@@ -1,0 +1,51 @@
+########## Development Dockerfile ##########
+
+version: '3.8'
+
+services:
+
+  db:
+    image: postgres:13.0-alpine
+    ports:
+      - 5432:5432
+    env_file:
+      - ./.env.dev
+    restart: on-failure
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+    
+  api:
+    build: 
+      context: ./api
+      dockerfile: Dockerfile.dev
+    command: sleep infinity
+    volumes:
+      - ./api:/app/api
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+      - maildev
+    restart: on-failure
+
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile.dev
+    command: sleep infinity
+    volumes:
+      - ./client:/app/client
+    ports:
+      - 1337:1337
+      - 6006:6006
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - api
+    restart: on-failure

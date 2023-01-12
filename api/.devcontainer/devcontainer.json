@@ -1,0 +1,28 @@
+{
+    "name": "creatorportal-api",
+    "dockerComposeFile": [
+        "../../docker-compose.yml"
+    ],
+    "service": "api",
+    "extensions": [
+        "ms-azuretools.vscode-docker",
+        "formulahendry.auto-rename-tag",
+        "svelte.svelte-vscode",
+        "waderyan.gitblame",
+        "ms-python.isort",
+        "haugerbr.project-tasks",
+        "redhat.vscode-yaml",
+        "ms-python.black-formatter",
+        "ms-python.pylint",
+        "visualstudioexptteam.vscodeintellicode",
+        "donjayamanne.python-extension-pack",
+        "ms-python.isort",
+        "ms-python.vscode-pylance"
+    ],
+    // Open the sub-folder with the source code
+    "workspaceFolder": "/app/api",
+    "overrideCommand": true,
+    "settings": {
+        "autoForwardPorts": false
+    }
+}

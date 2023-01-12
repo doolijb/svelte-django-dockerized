@@ -1,0 +1,4 @@
+# Official base image
+FROM node:18-bullseye-slim
+
+# TODO

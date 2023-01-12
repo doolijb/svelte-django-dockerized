@@ -1,0 +1,28 @@
+# pull official base image
+FROM python:3.10-slim
+EXPOSE 8000
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+
+# Set work directory
+WORKDIR /app/api
+COPY . .
+
+# Install psycopg2 dependencies
+RUN apt-get update \
+    && apt-get install -y libpq5 gcc python3-dev musl-dev libfreetype-dev
+
+# # # # # # # # # # # # # # # # 
+# Install python dependencies #
+# # # # # # # # # # # # # # # #
+
+# Make sure we have wheel installed
+RUN pip install wheel
+# Install required dependencies
+RUN pip install -r requirements.base.txt
+# Install our dev dependencies
+RUN pip install -r requirements.dev.txt

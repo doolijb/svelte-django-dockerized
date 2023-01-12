@@ -1,0 +1,9 @@
+#! bin/bash
+
+# Make sure current directory is /app/client
+if [ ! -f "package.json" ]; then
+    echo "Please run from /app/client"
+    exit 1
+fi
+
+npx eslint '.' --fix

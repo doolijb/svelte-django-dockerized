@@ -1,0 +1,18 @@
+# pull official lts base image
+FROM node:18-bullseye-slim
+
+# WORKDIR /app/client
+
+# Creates a non-root user with an explicit UID and adds permission to access the /app folder
+# For more info, please refer to https://aka.ms/vscode-docker-python-configure-containers
+# RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
+# USER appuser
+
+# Copy package.json, install packages
+COPY package.json .
+RUN npm i
+
+# Vite/Svelte
+EXPOSE 1337
+# Storybook
+EXPOSE 6006

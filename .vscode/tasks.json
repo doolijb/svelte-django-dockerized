@@ -1,0 +1,22 @@
+{
+  "tasks": [
+    {
+      "label": "docker-build: debug",
+      "type": "shell",
+      "command": "docker compose build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "docker-up: api",
+      "type": "shell",
+      "command": "docker compose up api -d",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+  ]
+}

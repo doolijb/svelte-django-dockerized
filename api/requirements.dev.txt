@@ -1,0 +1,4 @@
+black
+isort>=5.11,<5.12
+pydocstyle>=6.2,<6.3
+pylance>=0.2,<0.3

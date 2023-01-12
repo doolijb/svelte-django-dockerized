@@ -1,0 +1,62 @@
+# #! bin/bash
+
+# Make sure excuted with bash and not sh
+if [ -z "$BASH_VERSION" ]; then
+    echo "Please run with bash"
+    exit 1
+fi
+
+# Make sure we are in the root directory
+cd /app/api
+
+# First argument is the command to run
+CMD="$1"
+
+# If no script is provided, exit
+if [ -z CMD ]; then
+    echo "No command name provided"
+    exit 1
+fi
+
+# Set defaults flag values
+DETACH=''
+
+# Check rest of arguments for -d --silent --quiet flags
+shift
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -d | -s | --detach | --silent)
+            DETACH='nohup'
+            ;;
+        *)
+            echo "Unknown flag: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+# Build prefix with appropriate flags if they exist
+PREFIX="$DETACH"
+
+# format:black
+if [ $CMD = "format:black" ]; then
+  eval $"$PREFIX bash .scripts/format/black"
+  exit 0
+fi
+
+# format:isort
+if [ $CMD = "format:isort" ]; then
+  eval $"$PREFIX bash .scripts/format/isort"
+  exit 0
+fi
+
+# serve
+if [ $CMD = "serve" ]; then
+  eval $"$PREFIX python manage.py runserver 0.0.0.0:8000"
+  exit 0
+fi
+
+# If script is not found, exit
+echo "Command not found: $CMD"
+exit 1

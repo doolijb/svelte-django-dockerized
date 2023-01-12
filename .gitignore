@@ -1,0 +1,17 @@
+/venv
+/venv/*
+*/db.sqlite3
+*/filer_public/*
+*/filer_public_thumbnails/*
+env.yaml
+*db.sqlite3*
+**/__pycache__/
+passenger_wsgi.py
+*pyc
+tmp/
+client/node_modules
+.env
+public_html
+dist
+CreatorPortal.egg-info
+**/.nohup.out
