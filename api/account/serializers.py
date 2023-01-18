@@ -1,36 +1,75 @@
+from django.db.transaction import atomic
 from rest_framework import serializers
+from django.conf import settings
+
+from .models import EmailAddress, User
 
 
-class GETAccountSerializer(serializers.Serializer):
+# Serializer to grab the authenticated user or return a generic unauthenticated user object
+class CurrentUserSerializer(serializers.ModelSerializer):
     """
-    GET serializer that gets authenticated user's account information,
-    else returns default unauthenticated values.
+    Serializes the authenticated user with their email addresses, or returns a generic unauthenticated user object.
+    """
+    instance: EmailAddress
+    email_addresses = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email_addresses",
+        ]
+        read_only_fields = [
+            "id",
+            "username",
+        ]
+
+    def to_representation(self, instance):
+        """
+        Return the authenticated user or an empty object.
+        This is done because this serializer should not used to determine authentication.
+        """
+        return super().to_representation(instance) if instance.is_authenticated else {}
+
+    
+    class RegisteredUserSerializer(serializers.CreateOnlyDefault):
+        """
+        Serializes a registered user.
+        """
+
+        email_address = serializers.EmailField()
+
+        instance: EmailAddress
+        
+        class Meta:
+            model = User
+            fields = []
+            if settings.ENABLE_USERNAMES:
+                fields += ["username"]   
+
+
+
+
+class EmailAddressSerializer(serializers.ModelSerializer):
+    """
+    Serializes the email addresses for a user.
     """
 
-    def __init__(self, request):
-        # Default anonymous account
+    class Meta:
+        model = EmailAddress
+        fields = [
+            "id",
+            "is_verified",
+            "is_primary",
+        ]
+        read_only_fields = [
+            "id",
+            "email",
+            "is_verified",
+            "is_primary",
+        ]
 
-        self.body = {
-            "userName": None,
-            "isAuth": False,
-            "passwordSet": False,
-            "email": None,
-            "emails": [],
-            "isStaff": False,
-            "status": {"value": 0, "label": "Unauthorized"},
-            "social": {},
-            "favorites": [],
-        }
-
-        # Get authenticated account
-        if request.user.is_authenticated:
-            self.body["userName"] = request.user.username
-            self.body["isAuth"] = request.user.is_authenticated
-            self.body["passwordSet"] = bool(
-                request.user.password and request.user.has_usable_password()
-            )
-            self.body["email"] = request.user.emailaddress_set.get(primary=True).email
-            self.body["emails"] = request.user.emailaddress_set.all().values(
-                "email", "primary", "verified"
-            )
-            self.body["isStaff"] = request.user.is_staff
+        

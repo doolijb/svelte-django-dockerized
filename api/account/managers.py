@@ -4,10 +4,11 @@ Custom model managers for the account app.
 
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import transaction
-from django.db.models import Manager
+
+from core.lib.managers import BaseModelManager
 
 
-class UserManager(BaseUserManager):
+class UserManager(BaseUserManager, BaseModelManager):
     """
     Custom user model manager where email is the unique identifiers
     """
@@ -44,8 +45,43 @@ class UserManager(BaseUserManager):
         EmailAddress = self.model.email_address_set.related.model
         return EmailAddress.objects.get_by_natural_key(email).user
 
+    ###
+    # Serializer methods
+    ###
 
-class EmailAddressManager(Manager):
+    def serialize_current_user(self, **kwargs):
+        """
+        Serialize the current user.
+        """
+
+        cache_prefix = "serialize_current_user"
+
+        # Get "id" from the queryset
+        if "id" in self.query.fields: # type: ignore
+            kwargs.setdefault("cache_name", f"{cache_prefix}__{self.query.id}") # type: ignore
+
+        fields = set(kwargs.pop("fields", []))
+        fields.update(
+            {
+                "id",
+                "username",
+                "first_name",
+                "last_name",
+                "is_active",
+                "is_staff",
+                "is_superuser",
+                "email_addresses",
+                "email_addresses__id",
+                "email_addresses__email",
+                "email_addresses__is_primary",
+                "email_addresses__is_verified",
+            }
+        )
+        kwargs["fields"] = list(fields)
+        return self.serialize(single=True, **kwargs)
+
+
+class EmailAddressManager(BaseModelManager):
     """
     Custom manager for the EmailAddress model.
 
@@ -87,7 +123,7 @@ class EmailAddressManager(Manager):
         return self.get(**{email: email})
 
 
-class RedeemableKeyManager(Manager):
+class RedeemableKeyManager(BaseModelManager):
     """
     Custom manager for the RedeemableKey model.
     """
@@ -122,11 +158,11 @@ class RedeemableKeyManager(Manager):
         """
         return super().all()
 
-    def all(self):
+    def redeemable(self):
         """
         Return a queryset of redeemable keys for any redeemable.
         """
-        return super().filter(expired_at__isnull=True)
+        return super().filter(expired_at__isnull=True, redeemed_at__isnull=True)
 
     def expired(self):
         """

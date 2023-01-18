@@ -1,18 +1,18 @@
 {
   "tasks": [
     {
-      "label": "docker-build: debug",
+      "label": "docker:build",
       "type": "shell",
-      "command": "docker compose build",
+      "command": "bash .scripts/run docker:build",
       "group": {
         "kind": "build",
         "isDefault": true
       }
     },
     {
-      "label": "docker-up: api",
+      "label": "docker:up:api -d",
       "type": "shell",
-      "command": "docker compose up api -d",
+      "command": "bash .scripts/run docker:up:api -d",
       "group": {
         "kind": "build",
         "isDefault": true

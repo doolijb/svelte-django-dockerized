@@ -3,13 +3,13 @@ repos:
 
  -  repo: local
     hooks:
-    -   id: format:api:black
-        name: format:api:black
-        entry: .scripts/run format:api:black
+    -   id: api:format:black
+        name: api:format:black
+        entry: .scripts/run api:format:black
         language: script
-    -   id: format:api:isort
-        name: format:api:isort
-        entry: .scripts/run format:api:isort
+    -   id: api:format:isort
+        name: api:format:isort
+        entry: .scripts/run api:format:isort
         language: script
 
 

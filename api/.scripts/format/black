@@ -6,4 +6,4 @@ if [ ! -d "/app/api" ]; then
     exit 1
 fi
 
-black .
+black ./**/*.py

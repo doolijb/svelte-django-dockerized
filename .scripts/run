@@ -33,8 +33,39 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-# format:api:black
-if [ $CMD = "format:api:black" ]; then
+###
+# docker
+###
+
+if [ $CMD = "docker:build" ]; then
+    source .scripts/docker/get:compose
+    eval $"$PREFIX bash .scripts/docker/build"
+    exit 0
+fi
+
+if [ $CMD = "docker:up" ]; then
+    source .scripts/docker/get:compose
+    bash .scripts/docker/up
+    exit 0
+fi
+
+if [ $CMD = "docker:up:api" ]; then
+    source .scripts/docker/get:compose
+    bash .scripts/docker/up:api
+    exit 0
+fi
+
+if [ $CMD = "docker:down:dev" ]; then
+    source .scripts/docker/get:compose
+    bash .scripts/docker/down:dev
+    exit 0
+fi
+
+###
+# api
+###
+
+if [ $CMD = "api:format:black" ]; then
     source .scripts/docker/get:compose
     bash .scripts/docker/up:dev --silent
     EXEC="bash /app/api/.scripts/run format:black"
@@ -42,8 +73,7 @@ if [ $CMD = "format:api:black" ]; then
     exit 0
 fi
 
-# format:api:isort
-if [ $CMD = "format:api:isort" ]; then
+if [ $CMD = "api:format:isort" ]; then
     source .scripts/docker/get:compose
     bash .scripts/docker/up:dev --silent
     EXEC="bash /app/api/.scripts/run format:black"
@@ -51,8 +81,12 @@ if [ $CMD = "format:api:isort" ]; then
     exit 0
 fi
 
-# format:client:lint
-if [ $CMD = "format:client:lint" ]; then
+###
+# client
+###
+
+# client:format
+if [ $CMD = "client:format:lint" ]; then
     source .scripts/docker/get:compose
     bash .scripts/docker/up:dev --silent
     EXEC="bash /app/client/.scripts/run format:lint"
@@ -60,27 +94,10 @@ if [ $CMD = "format:client:lint" ]; then
     exit 0
 fi
 
-# docker:build:dev
-if [ $CMD = "docker:build:dev" ]; then
-    source .scripts/docker/get:compose
-    eval $"$PREFIX bash .scripts/docker/build:dev"
-    exit 0
-fi
 
-# docker:up:dev
-if [ $CMD = "docker:up:dev" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/up:dev
-    exit 0
-fi
-
-# docker:down:dev
-if [ $CMD = "docker:up:dev" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/down:dev
-    exit 0
-fi
-
+###
 # If script is not found, exit
+###
+
 echo "Command not found: $CMD"
 exit 1

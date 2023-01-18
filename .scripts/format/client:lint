@@ -1,5 +1,0 @@
-#! bin/bash
-
-# Execute eslint inside client container
-COMMAND = "cd /app/client && npm run lint"
-eval $"$DOCKER_COMPOSE -f docker-compose.dev.yml exec -c $COMMAND"

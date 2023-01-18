@@ -2,11 +2,12 @@
     "remote.autoForwardPorts": false,
     "task.problemMatchers.neverPrompt": true,
     "python.formatting.provider": "black",
+    "python.formatting.blackPath": "black",
     "black-formatter.interpreter": [
         "/usr/local/bin/python"
     ],
     "[python]": {
-        "editor.defaultFormatter": null,
+        "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.insertSpaces": true,
         "editor.tabSize": 4,
         "editor.formatOnSave": true,
@@ -15,11 +16,14 @@
     "editor.insertSpaces": true,
     "editor.detectIndentation": false,
     "python.linting.enabled": true,
-    "editor.formatOnSave": true,
     "python.globalModuleInstallation": false,
     "python.languageServer": "Pylance",
     "python.defaultInterpreterPath": "/usr/local/bin/python",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.inlayHints.functionReturnTypes": true,
-    "python.analysis.inlayHints.variableTypes": true
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.analysis.importFormat": "absolute",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "editor.formatOnSave": true,
 }

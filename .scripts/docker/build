@@ -5,4 +5,4 @@ if [[ "$1" == "--silent" ]]; then
   SILENT="> /dev/null 2>&1"
 fi
 
-eval $"$DOCKER_COMPOSE -f docker-compose.yml build $SILENT"
+eval $"$DOCKER_COMPOSE build $SILENT"
