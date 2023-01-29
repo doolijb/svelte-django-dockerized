@@ -15,3 +15,5 @@ public_html
 dist
 CreatorPortal.egg-info
 **/.nohup.out
+**/venv
+server/dev_html/readme.md

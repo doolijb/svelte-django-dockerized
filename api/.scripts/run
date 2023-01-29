@@ -7,7 +7,7 @@ if [ -z "$BASH_VERSION" ]; then
 fi
 
 # Make sure we are in the root directory
-cd /app/api
+cd /srv/www/api
 
 # First argument is the command to run
 CMD="$1"
@@ -53,8 +53,10 @@ fi
 
 # serve
 if [ $CMD = "serve" ]; then
-  eval $"$PREFIX python manage.py runserver 0.0.0.0:8000"
-  exit 0
+    eval "npx kill-port 8000"
+    eval ". venv/bin/activate"
+    eval $"$PREFIX python manage.py runserver 0.0.0.0:8000"
+    exit 0
 fi
 
 # If script is not found, exit

@@ -1,0 +1,57 @@
+# pull official base image
+# FROM python:3.10-slim
+FROM nginx/unit:1.28.0-python3.10
+
+# # # # # # # # # # # # # # # # # # #
+# DEV ONLY ENV VARIABLES            #
+# # # # # # # # # # # # # # # # # # #
+
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+
+# # # # # # # # # # # # # # # # # # #
+# INSTALL LINUX DEPENCENDIES        #
+# # # # # # # # # # # # # # # # # # #
+
+RUN apt-get update \
+    && apt-get install -y libpq5 gcc python3-dev musl-dev libfreetype-dev npm
+
+# Install kill-port globaly
+RUN npm install -g kill-port
+
+# # # # # # # # # # # # # # # # # # #
+#  COPY API FILES TO CONTAINER      #
+# # # # # # # # # # # # # # # # # # #
+
+WORKDIR /srv/www/api
+COPY ../api/requirements.base.txt .
+COPY ../api/requirements.dev.txt .
+
+# # # # # # # # # # # # # # # # # # #
+# INSTALL PYTHON ENVIRONMENT        #
+# # # # # # # # # # # # # # # # # # #
+
+# Create python virtual environment
+RUN python3.10 -m venv venv
+RUN . venv/bin/activate
+# Install required python dependencies
+RUN pip install -r requirements.base.txt
+# Install dev python dependencies
+RUN pip install -r requirements.dev.txt
+
+# # # # # # # # # # # # # # # # # # #
+# COPY THE NGINX UNIT CONFIG        #
+# # # # # # # # # # # # # # # # # # #
+
+COPY ../server/unit.conf.dev /var/lib/unit/conf.json
+
+# # # # # # # # # # # # # # # # # # #
+# OPEN CONTAINER PORTS              #
+# # # # # # # # # # # # # # # # # # #
+
+# Expose application port
+EXPOSE 8000
+# Expose unitd api port ( For development only )
+EXPOSE 8090

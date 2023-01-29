@@ -8,5 +8,7 @@
     "editor.detectIndentation": false,
     "cSpell.words": [
         "isort"
-    ]
+    ],
+    "black-formatter.importStrategy": "useBundled",
+    "editor.formatOnSave": true
 }

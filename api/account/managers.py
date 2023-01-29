@@ -4,11 +4,10 @@ Custom model managers for the account app.
 
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import transaction
+from django.db.models import Manager
 
-from core.lib.managers import BaseModelManager
 
-
-class UserManager(BaseUserManager, BaseModelManager):
+class UserManager(BaseUserManager):
     """
     Custom user model manager where email is the unique identifiers
     """
@@ -45,43 +44,8 @@ class UserManager(BaseUserManager, BaseModelManager):
         EmailAddress = self.model.email_address_set.related.model
         return EmailAddress.objects.get_by_natural_key(email).user
 
-    ###
-    # Serializer methods
-    ###
 
-    def serialize_current_user(self, **kwargs):
-        """
-        Serialize the current user.
-        """
-
-        cache_prefix = "serialize_current_user"
-
-        # Get "id" from the queryset
-        if "id" in self.query.fields: # type: ignore
-            kwargs.setdefault("cache_name", f"{cache_prefix}__{self.query.id}") # type: ignore
-
-        fields = set(kwargs.pop("fields", []))
-        fields.update(
-            {
-                "id",
-                "username",
-                "first_name",
-                "last_name",
-                "is_active",
-                "is_staff",
-                "is_superuser",
-                "email_addresses",
-                "email_addresses__id",
-                "email_addresses__email",
-                "email_addresses__is_primary",
-                "email_addresses__is_verified",
-            }
-        )
-        kwargs["fields"] = list(fields)
-        return self.serialize(single=True, **kwargs)
-
-
-class EmailAddressManager(BaseModelManager):
+class EmailAddressManager(Manager):
     """
     Custom manager for the EmailAddress model.
 
@@ -89,6 +53,8 @@ class EmailAddressManager(BaseModelManager):
     @method normalize_email: Normalize the email address by lowercasing the domain part of the email
     @method primary: Return the primary email address for a user.
     """
+
+    use_for_related_fields = True
 
     def create(self, user, email, is_primary=False, is_verified=False):
         """
@@ -113,17 +79,13 @@ class EmailAddressManager(BaseModelManager):
         """
         Return the primary email address for a user.
         """
-        # Raise exception if not called from user instance relation.
-        if "user" not in self.query.fields:  # type: ignore
-            raise ValueError("Must be called on a user instance realtion.")
-
         return self.get(is_primary=True)
 
     def get_by_natural_key(self, email):
         return self.get(**{email: email})
 
 
-class RedeemableKeyManager(BaseModelManager):
+class RedeemableKeyManager(Manager):
     """
     Custom manager for the RedeemableKey model.
     """

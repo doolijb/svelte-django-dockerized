@@ -11,33 +11,8 @@ class BaseModel(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid4)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Grab the manager for easier access.
-        self._manager = self.__class__.objects
-
     class Meta:
         abstract = True
-
-    def save(self, *args, **kwargs):
-        """
-        Saves the model and clears all caches.
-        """
-        self.clear_caches()
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        """
-        Deletes the model and clears all caches.
-        """
-        self.clear_caches()
-        super().delete(*args, **kwargs)
-
-    def clear_caches(self):
-        """
-        Clears all caches for this model.
-        """
-        self._manager.clear_caches(object=self)  # type: ignore
 
 
 class DatesMixin(models.Model):

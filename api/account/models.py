@@ -59,7 +59,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
 
 class EmailAddress(BaseModel, DatesMixin):
     user = models.ForeignKey(
-        "account.User", on_delete=models.CASCADE, related_name="email_addresses"
+        User, on_delete=models.CASCADE, related_name="email_addresses"
     )
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
@@ -110,6 +110,7 @@ class EmailAddress(BaseModel, DatesMixin):
         if self.user.email_addresses.count() == 1:
             raise ValueError(_("Cannot delete only email address."))
         super().delete(*args, **kwargs)
+
 
 class RedeemableKey(BaseModel, DatesMixin):
     """
@@ -171,7 +172,7 @@ class RedeemableKey(BaseModel, DatesMixin):
         """
 
         if not user == self.user:
-            raise ValueError(_("User does not match kecommity."))
+            raise ValueError(_("No such key for user."))
 
         if self.redeemed:
             raise ValueError(_("Key has already been redeemed."))

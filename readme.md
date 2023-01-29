@@ -4,7 +4,14 @@ This is an opinionated project template emphasizing productivity, allowing devel
 
 # Stack
 
+## server - NGINX Unit
+
+Handles high level routing for the entire application and natively serves static files, and the backend Django ASGI. Proxies the appropriate upstream containers and services to the public.
+
+- TODO
+
 ## api - Django 4.0, Python 3.10
+`Unit`: `http://localhost:8000/api` -> `https://example.com/api`
 
 Django provides the versatility and utilitarianism available only through Python3.
 
@@ -47,23 +54,31 @@ entries = BlogPost.objects.filter(title__icontains="Spokane", author__is_superus
 For in-depth documentation and tutorials, refer to [The Django Project](https://www.djangoproject.com/).
 
 ## client - Svelte
+`Unit`: `http://localhost:8000` -> `https://example.com`
 
 - TODO
 
-## storybook - Svelte
+## media storage - MinIO
+`Unit`: `https://localhost:8000/media` -> `https://example.com/media`
 
+MinIO is an S3 compatible object storage. Use it now for development and production. Upgrade later to a scale-able cloud object storage with minimal reconfiguration if your application ever outgrows it.
+
+## design tool - Storybook
+`Unit`: `http://localhost:8000/dev/sb` -> `n/a`
 - TODO
 
-## maildev- Maildev
+## mock smtp - MailDev
+`Unit`: `http://localhost:8000/dev/mail` -> `n/a`
 
-- TODO
+### Why maildev?
 
-## db - Postgresql
+- Recent releases with high development cadence.
+- To swap out for an alternative like MailHog, just switch out docker containers and update the `.env.dev`.
 
+## database - Postgresql
 - TODO
 
 # Getting Started
-
 - TODO
 
 # Changelog

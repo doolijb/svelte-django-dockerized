@@ -1,17 +1,23 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
 
- -  repo: local
-    hooks:
-    -   id: api:format:black
-        name: api:format:black
-        entry: .scripts/run api:format:black
-        language: script
-    -   id: api:format:isort
-        name: api:format:isort
-        entry: .scripts/run api:format:isort
-        language: script
+  -  repo: local
+      hooks:
+      -   id: api:format:black
+          name: api:format:black
+          entry: .scripts/run api:format:black
+          language: script
+      -   id: api:format:isort
+          name: api:format:isort
+          entry: .scripts/run api:format:isort
+          language: script
 
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+      rev: v1.4.2
+      hooks:
+      - id: forbid-tabs
+      - id: remove-tabs
+        args: [--whitespaces-count, 4]
 
 # -   repo: https://github.com/psf/black
 #     rev: 22.12.0

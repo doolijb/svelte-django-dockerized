@@ -2,56 +2,116 @@
 
 version: '3.8'
 
+# # # # # # # # # # # # # # # # # # # #
+# Networks                            #
+# # # # # # # # # # # # # # # # # # # #
+networks:
+
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
 services:
 
-    db:
-        image: postgres:13.0-alpine
-        ports:
-            - 5432:5432
-        env_file:
-            - ./.env.dev
-        restart: on-failure
+  # # # # # # # # # # # # # # # # # # #
+  # SERVER: API                       #
+  # # # # # # # # # # # # # # # # # # #
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile.dev
+    command: unitd --no-daemon --control 0.0.0.0:8090
+    volumes:
+      - ./api:/srv/www/api
+      - ./server/unit.conf.dev:/srv/www/server/unit.conf.dev
+      - ./server/unit.conf.prod:/srv/www/server/unit.conf.prod
+      - ./server/dev_html:/srv/www/server/dev_html
+      - ./readme.md:/srv/www/server/readme.md
+    networks:
+      default:
+        ipv4_address: 172.20.0.10
+    ports:
+      - 8000:8000
+      - 8090:8090
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+      - mail
+      - redis
+    restart: on-failure
 
-    maildev:
-        image: maildev/maildev
-        ports:
-            - 1080:1080
-            - 1025:1025
+  # # # # # # # # # # # # # # # # # # #
+  # DB: POSTGRES                      #
+  # # # # # # # # # # # # # # # # # # #
+  db:
+    image: postgres:13.0-alpine
+    networks:
+      default:
+        ipv4_address: 172.20.0.20
+    ports:
+      - 5432:5432
+    env_file:
+      - ./.env.dev
+    restart: on-failure
 
-    redis:
-        image: redis:7.0-alpine
-        ports:
-            - 6379:6379
-        restart: on-failure
+  # # # # # # # # # # # # # # # # # # #
+  # MEDIA: MINIO - S3 COMPATIBLE      #
+  # # # # # # # # # # # # # # # # # # #
+  media:
+    image: minio/minio:RELEASE.2023-01-25T00-19-54Z
+    networks:
+      default:
+        ipv4_address: 172.20.0.30
+    ports:
+      - 9000:9000
+    env_file:
+      - ./.env.dev
+    command: server /data
+    restart: on-failure
 
-    api:
-        build:
-            context: ./api
-            dockerfile: Dockerfile.dev
-        command: sleep infinity
-        volumes:
-            - ./api:/app/api
-        ports:
-            - 8000:8000
-        env_file:
-            - ./.env.dev
-        depends_on:
-            - db
-            - maildev
-        restart: on-failure
+  # # # # # # # # # # # # # # # # # # #
+  # REDIS                             #
+  # # # # # # # # # # # # # # # # # # #
+  redis:
+    image: redis:7.0-alpine
+    networks:
+      default:
+        ipv4_address: 172.20.0.40
+    ports:
+      - 6379:6379
+    restart: on-failure
 
-    client:
-        build:
-            context: ./client
-            dockerfile: Dockerfile.dev
-        command: sleep infinity
-        volumes:
-            - ./client:/app/client
-        ports:
-            - 1337:1337
-            - 6006:6006
-        env_file:
-            - ./.env.dev
-        depends_on:
-            - api
-        restart: on-failure
+  # # # # # # # # # # # # # # # # # # #
+  # MAIL: MAILDEV - MOCK SMTP & INBOX #
+  # # # # # # # # # # # # # # # # # # #
+  mail:
+    image: maildev/maildev
+    networks:
+      default:
+        ipv4_address: 172.20.0.50
+    ports:
+      - 1080:1080
+      - 1025:1025
+
+  # # # # # # # # # # # # # # # # # # #
+  # CLIENT: SVETLE + STORYBOOK        #
+  # # # # # # # # # # # # # # # # # # #
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    command: sleep infinity
+    volumes:
+      - ./client:/app/client
+    networks:
+      default:
+        ipv4_address: 172.20.0.60
+    ports:
+      - 1337:1337
+      - 6006:6006
+    env_file:
+      - ./.env.dev
+    restart: on-failure

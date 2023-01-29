@@ -4,7 +4,7 @@
     "python.formatting.provider": "black",
     "python.formatting.blackPath": "black",
     "black-formatter.interpreter": [
-        "/usr/local/bin/python"
+        "/srv/www/api/venv/bin/python"
     ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
@@ -18,7 +18,7 @@
     "python.linting.enabled": true,
     "python.globalModuleInstallation": false,
     "python.languageServer": "Pylance",
-    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "python.defaultInterpreterPath": "/srv/www/api/venv/binpython",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.inlayHints.variableTypes": true,

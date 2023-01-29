@@ -1,49 +1,69 @@
 __title__ = "Svelte Django Dockerized"
 __author__ = "Jody Doolittle"
 
-import os, sys
+import os
+import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR: Path = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, os.path.join(BASE_DIR, ""))
 
-VERSION = 0.1
+VERSION: float = 0.1
 
 SITE_ID = 1
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY: str | None = os.environ.get("DJANGO_SECRET_KEY")
 
-SERVER_TYPE = os.environ.get("SERVER_TYPE")
+if SECRET_KEY is None:
+    raise ValueError("DJANGO_SECRET_KEY must be set")
 
-DEBUG = int(os.environ.get("DJANGO_DEBUG", default=0))
+SERVER_TYPE: str = os.environ.get("SERVER_TYPE", "dev")
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
+DEBUG:int = int(os.environ.get("DJANGO_DEBUG", default=0))
 
-ENABLE_USERNAMES = bool(os.environ.get("DJANGO_ENABLE_USERNAMES", default=False))
+ALLOWED_HOSTS: list[str] = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
-CACHE_BACKEND = os.environ.get(
-    "DJANGO_CACHE_BACKEND", default="django_redis.cache.RedisCache"
+ENABLE_USERNAMES: bool = bool(os.environ.get("DJANGO_ENABLE_USERNAMES", default=True))
+
+CACHE_BACKEND: str = os.environ.get(
+    "DJANGO_CACHE_BACKEND", default="django.core.cache.backends.redis.RedisCache"
 )
 
-CACHE_HOST = os.environ.get("DJANGO_CACHE_HOST", default="redis")
+CACHALOT_ENABLED: bool = bool(os.environ.get("DJANGO_CACHALOT_ENABLED", default=True))
 
-CACHE_KEY_PREFIX = os.environ.get("DJANGO_CACHE_KEY_PREFIX", default="")
+CACHE_HOST: str = os.environ.get("DJANGO_CACHE_HOST")
 
-CACHE_DEFAULT_TIMEOUT = os.environ.get("DJANGO_CACHE_DEFAULT_TIMEOUT", default=300)
+CACHE_KEY_PREFIX: str = os.environ.get("DJANGO_CACHE_KEY_PREFIX", default="")
 
-SQL_HOST = os.environ.get("SQL_HOST", default="postgres")
+CACHE_DEFAULT_TIMEOUT: int = int(os.environ.get("DJANGO_CACHE_DEFAULT_TIMEOUT", default=300))
 
-SQL_PORT = os.environ.get("SQL_PORT", default="5432")
+CACHALOT_TIMEOUT: int = int(os.environ.get("DJANGO_CACHALOT_TIMEOUT", default=CACHE_DEFAULT_TIMEOUT))
 
-SQL_DATABASE = os.environ.get("SQL_DATABASE", default="postgres")
+LOG_LEVEL: str = os.environ.get("DJANGO_LOG_LEVEL")
 
-SQL_USER = os.environ.get("SQL_USER", default="postgres")
+SQL_HOST: str = os.environ.get("DJANGO_SQL_HOST")
 
-SQL_PASSWORD = os.environ.get("SQL_PASSWORD", default="postgres")
+SQL_PORT: str = os.environ.get("DJANGO_SQL_PORT")
 
-SQL_ENGINE = os.environ.get(
+SQL_DATABASE: str = os.environ.get("DJANGO_SQL_DATABASE")
+
+SQL_USER: str = os.environ.get("DJANGO_SQL_USER")
+
+SQL_PASSWORD: str = os.environ.get("DJANGO_SQL_PASSWORD")
+
+SQL_ENGINE: str = os.environ.get(
     "DJANGO_SQL_ENGINE", default="django.db.backends.postgresql"
 )
+
+# If not secret key is set, raise an error and provide a new one with instructions
+if SECRET_KEY is None:
+    new_key = os.urandom(32)
+    raise ValueError(f"""
+    `DJANGO_SECRET_KEY` must be set in .env file!
+    Set a key and re up the container.
+    Here is a new key you can use:
+    {new_key}\n
+    """)

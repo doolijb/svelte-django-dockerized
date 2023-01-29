@@ -1,0 +1,75 @@
+{
+    "listeners": {
+        "*:8000": {
+            "pass": "routes"
+        }
+    },
+
+    "routes": [
+        {
+            "match": {
+                "uri": [
+                    "/api*"
+                ]
+            },
+            "action": {
+                "pass": "applications/django"
+            }
+        },
+        {
+            "match":{
+                "uri": [
+                    "/media*"
+                ],
+                "method": [
+                    "GET"
+                ]
+            },
+            "action": {
+                "proxy": "media:9000"
+            }
+        },
+        {
+            "match": {
+                "uri": [
+                    "/dev/sb"
+                ]
+            },
+            "action": {
+                "proxy": "client:6006"
+            }
+        },
+        {
+            "match": {
+                "uri": [
+                    "/dev/mail"
+                ]
+            },
+            "action": {
+                "proxy": "mail:1080"
+            }
+        },
+        {
+            "match": {
+                "uri": [
+                    "*"
+                ],
+                "method": [
+                    "GET"
+                ]
+            },
+            "action": {
+                "proxy": "client:3000"
+            }
+        },
+    ],
+
+    "applications": {
+        "django": {
+            "type": "python 3.10",
+            "path": "/app/api/",
+            "home": "/app/api/venv/",
+            "module": "core.asgi"
+        }
+    }
+}

@@ -29,7 +29,7 @@ class Command(SuperUserCommand):
         password = input("Password: ")
 
         # Create the user
-        user = User.objects.create_superuser(
+        user = User.objects.create_superuser()
 
 
         

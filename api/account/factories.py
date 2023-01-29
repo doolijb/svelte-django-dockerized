@@ -43,7 +43,6 @@ class UserFactory(factory.django.DjangoModelFactory):
         """
         if not create:
             return
-
         # Get extracted email addresses or create a random number of email addresses
         email_addresses = extracted or [{}] * int(fake.pyint(min_value=1, max_value=3))
 
@@ -52,17 +51,14 @@ class UserFactory(factory.django.DjangoModelFactory):
 
         # Create the email addresses
         for email_address in email_addresses:
+            email_address['user'] =  user
             email_address.setdefault("email", factory.Faker("email"))
-            email_address.setdefault("is_primary", not has_primary)
+            email_address.setdefault("is_primary", (not has_primary))
+            has_primary: bool = has_primary if has_primary else email_address["is_primary"]
 
             # If we have more than one email, then the primary email is verified
             if len(email_addresses) > 1 and not has_primary:
                 email_address.setdefault("is_verified", True)
-            if email_address["is_primary"]:
-                has_primary = True
-            email_address["user"] = user
-            # Create the email address
-
             EmailAddressFactory(**email_address)
 
 
