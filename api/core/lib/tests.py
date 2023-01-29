@@ -27,10 +27,10 @@ class BaseApiTestCase(TestCase):
 
     # Set these in the child class
     url_name = None  # The name of the url pattern relative to the app
-    user_password = "123password"  # The unhashed password for the user
+    user_password = '123password'  # The unhashed password for the user
     user_args = {  # The arguments to pass to the user factory
-        "email_addresses": [{"is_primary": True, "is_verified": True}],
-        "password": user_password,
+        'email_addresses': [{'is_primary': True, 'is_verified': True}],
+        'password': user_password,
     }
 
     def __init__(self, *args, **kwargs):
@@ -79,7 +79,7 @@ class BaseApiTestCase(TestCase):
         Logs in the user in, returning a token pair.
         """
 
-        url_pattern = self.get_url_pattern("account:tokens")
+        url_pattern = self.get_url_pattern('account:tokens')
         url = self.get_url(url_pattern)
         view = self.get_view(url_pattern)
 
@@ -87,8 +87,8 @@ class BaseApiTestCase(TestCase):
         request = self.factory.post(
             url,
             data={
-                "username": username or self.user.username,
-                "password": password or self.user_password,
+                'username': username or self.user.username,
+                'password': password or self.user_password,
             },
         )
 

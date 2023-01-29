@@ -142,4 +142,4 @@ class RedeemableKeyManager(Manager):
         """
         Return a queryset of redeemable keys for email addresses.
         """
-        return self.filter(redeemable_content_type__model="emailaddress")
+        return self.filter(redeemable_content_type__model='emailaddress')

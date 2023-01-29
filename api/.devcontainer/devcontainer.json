@@ -1,9 +1,7 @@
 {
-    "name": "server",
     "dockerComposeFile": [
         "../../docker-compose.yml"
     ],
-    "service": "server",
     "extensions": [
         "ms-python.python",
         "ms-azuretools.vscode-docker",
@@ -18,12 +16,13 @@
         "visualstudioexptteam.vscodeintellicode",
         "donjayamanne.python-extension-pack",
         "ms-python.isort",
-        "ms-python.vscode-pylance",
+        "ms-python.vscode-pylance"
     ],
-    // Open the sub-folder with the source code
-    "workspaceFolder": "/srv/www/api",
+    "name": "server",
     "overrideCommand": true,
+    "service": "server",
     "settings": {
         "autoForwardPorts": false
-    }
+    },
+    "workspaceFolder": "/srv/www/api"
 }

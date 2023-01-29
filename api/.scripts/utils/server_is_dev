@@ -1,4 +1,4 @@
-#! bin/bash
+#! bash
 # Make sure SERVER_TYPE=dev
 if [ ! $SERVER_TYPE = "DEV" ]; then
     echo "ERROR: Only execute this script in a dev environment!"

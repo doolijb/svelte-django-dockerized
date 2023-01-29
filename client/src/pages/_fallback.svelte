@@ -1,5 +1,5 @@
 <script>
-	import PageHeading from '../components/basic/view/PageHeading/PageHeading.svelte'
+    import PageHeading from '../components/basic/view/PageHeading/PageHeading.svelte'
     import {leftover} from '@roxi/routify'
 </script>
 

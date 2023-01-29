@@ -1,4 +1,4 @@
-#! bin/bash
+#! bash
 
 # # # # # # # # # # # # # # # #
 # SAFETY CHECKS               #
@@ -55,9 +55,9 @@ while [ $# -gt 0 ]; do
             PREFIX=$"nohup $PREFIX"
             ;;
         *)
-    # Else, add to suffix
-    SUFFIX="$SUFFIX $1"
-    ;;
+            # Else, add to suffix
+            SUFFIX="$SUFFIX $1"
+            ;;
     esac
     shift
 done

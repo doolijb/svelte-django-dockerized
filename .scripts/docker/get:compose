@@ -1,13 +1,13 @@
-#! bin/bash
+#! bash
 
 # Find if we are using "docker compose" or "docker-compose"
 if command -v docker compose > /dev/null; then
-  DOCKER_COMPOSE="docker compose"
+    DOCKER_COMPOSE="docker compose"
 elif command -v docker-compose > /dev/null; then
-  DOCKER_COMPOSE="docker-compose"
+    DOCKER_COMPOSE="docker-compose"
 else
-  echo "docker compose or docker-compose not found"
-  exit 1
+    echo "docker compose or docker-compose not found"
+    exit 1
 fi
 
 export DOCKER_COMPOSE

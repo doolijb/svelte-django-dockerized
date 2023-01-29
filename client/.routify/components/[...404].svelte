@@ -11,6 +11,6 @@
 </script>
 
 <!-- This file was created by Routify.
-     To customize the error page, create a catchall page 
+     To customize the error page, create a catchall page
      in the root of your project. Eg. [...404].svelte -->
 404 - Could not find the page "{url}"

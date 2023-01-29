@@ -1,22 +1,22 @@
 {
-  "tasks": [
-    {
-      "label": "docker:build",
-      "type": "shell",
-      "command": "bash .scripts/run docker:build",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-    {
-      "label": "docker:up:api -d",
-      "type": "shell",
-      "command": "bash .scripts/run docker:up:api -d",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-  ]
+    "tasks": [
+        {
+            "command": "bash .scripts/run docker:build",
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            },
+            "label": "docker:build",
+            "type": "shell"
+        },
+        {
+            "command": "bash .scripts/run docker:up:api -d",
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            },
+            "label": "docker:up:api -d",
+            "type": "shell"
+        }
+    ]
 }

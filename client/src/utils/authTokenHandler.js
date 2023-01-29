@@ -19,7 +19,7 @@ function setCookie (name, value, exp_days) {
     d.setTime(d.getTime() + (exp_days * 24 * 60 * 60 * 1000))
     const expires = 'expires=' + d.toGMTString()
     document.cookie =
-		name + '=' + value + ';' + expires + ';path=/'
+        name + '=' + value + ';' + expires + ';path=/'
 }
 
 function deleteCookie (name) {

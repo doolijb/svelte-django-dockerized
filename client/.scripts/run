@@ -1,4 +1,4 @@
-# #! bin/bash
+# #! bash
 
 # Make sure excuted with bash and not sh
 if [ -z "$BASH_VERSION" ]; then

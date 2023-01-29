@@ -1,13 +1,13 @@
 {
-  "recommendations": [
-    "ms-azuretools.vscode-docker",
-    "formulahendry.auto-rename-tag",
-    "ms-python.python",
-    "svelte.svelte-vscode",
-    "waderyan.gitblame",
-    "ms-python.isort",
-    "haugerbr.project-tasks",
-    "redhat.vscode-yaml",
-    "streetsidesoftware.code-spell-checker"
-  ]
+    "recommendations": [
+        "ms-azuretools.vscode-docker",
+        "formulahendry.auto-rename-tag",
+        "ms-python.python",
+        "svelte.svelte-vscode",
+        "waderyan.gitblame",
+        "ms-python.isort",
+        "haugerbr.project-tasks",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker"
+    ]
 }

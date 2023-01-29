@@ -1,15 +1,18 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-    -   repo: local
-        hooks:
-        -   id: api:format:black
-            name: api:format:black
-            entry: .scripts/run api:format:black
-            language: script
-        -   id: api:format:isort
-            name: api:format:isort
-            entry: .scripts/run api:format:isort
-            language: script
+    # TODO: Add this back in
+    # -   repo: local
+    #     hooks:
+    #     -   id: api:format:black
+    #         name: api:format:black
+    #         entry: .scripts/run
+    #         args: ["api:format:black"]
+    #         language: script
+    #     -   id: api:format:isort
+    #         name: api:format:isort
+    #         entry: .scripts/run
+    #         args: ["api:format:isort"]
+    #         language: script
 
     -   repo: https://github.com/Lucas-C/pre-commit-hooks
         rev: v1.4.2
@@ -48,7 +51,6 @@ repos:
             exclude: ^(^node_modules/.*$|^package-lock.json$)
             args: [--autofix, --indent, "4"]
         -   id: requirements-txt-fixer
-        -   id: double-quote-string-fixer
 
     -   repo: https://github.com/lovesegfault/beautysh
         rev: v6.2.1

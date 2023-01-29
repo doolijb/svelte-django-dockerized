@@ -1,4 +1,4 @@
-#! bin/bash
+#! bash
 
 # Make sure current directory is /app/client
 if [ ! -f "package.json" ]; then

@@ -45,7 +45,7 @@ $> python manage.py migrate
 ```
 
 ``` python
-# Query for all blog entries containing "Spokane" in the title, 
+# Query for all blog entries containing "Spokane" in the title,
 # and were authored by an administrator
 
 entries = BlogPost.objects.filter(title__icontains="Spokane", author__is_superuser=True)
@@ -88,4 +88,3 @@ MinIO is an S3 compatible object storage. Use it now for development and product
 # TODO
 
 - Rewrite bash scripts
-

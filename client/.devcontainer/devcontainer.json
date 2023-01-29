@@ -1,23 +1,22 @@
 {
-  "name": "creatorportal-client",
-  "dockerComposeFile": [
-    "../../docker-compose.yml"
-  ],
-  "service": "client",
-  "extensions": [
-    "ms-azuretools.vscode-docker",
-    "formulahendry.auto-rename-tag",
-    "ms-python.python",
-    "svelte.svelte-vscode",
-    "waderyan.gitblame",
-    "ms-python.isort",
-    "haugerbr.project-tasks",
-    "redhat.vscode-yaml"
-  ],
-  // Open the sub-folder with the source code
-  "workspaceFolder": "/app/client",
-  "overrideCommand":true,
-  "settings": {
-    "remote.autoForwardPorts": false
-  }
+    "dockerComposeFile": [
+        "../../docker-compose.yml"
+    ],
+    "extensions": [
+        "ms-azuretools.vscode-docker",
+        "formulahendry.auto-rename-tag",
+        "ms-python.python",
+        "svelte.svelte-vscode",
+        "waderyan.gitblame",
+        "ms-python.isort",
+        "haugerbr.project-tasks",
+        "redhat.vscode-yaml"
+    ],
+    "name": "creatorportal-client",
+    "overrideCommand": true,
+    "service": "client",
+    "settings": {
+        "remote.autoForwardPorts": false
+    },
+    "workspaceFolder": "/app/client"
 }

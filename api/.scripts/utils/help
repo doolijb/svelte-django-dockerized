@@ -1,4 +1,4 @@
-#! bin/bash
+#! bash
 # List all scripts
 echo "Help for API scripts:"
 echo "  Usage: ./scripts/run <command> [flags] [args]"
