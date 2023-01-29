@@ -1,4 +1,4 @@
-# bin/bash
+#! bin/bash
 
 # Find if we are using "docker compose" or "docker-compose"
 if command -v docker compose > /dev/null; then

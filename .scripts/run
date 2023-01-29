@@ -49,9 +49,9 @@ if [ $CMD = "docker:up" ]; then
     exit 0
 fi
 
-if [ $CMD = "docker:up:api" ]; then
+if [ $CMD = "docker:up:server" ]; then
     source .scripts/docker/get:compose
-    bash .scripts/docker/up:api
+    bash .scripts/docker/up:server
     exit 0
 fi
 
@@ -67,17 +67,17 @@ fi
 
 if [ $CMD = "api:format:black" ]; then
     source .scripts/docker/get:compose
-    bash .scripts/docker/up:dev --silent
-    EXEC="bash /app/api/.scripts/run format:black"
-    eval $"$PREFIX $DOCKER_COMPOSE exec api $EXEC"
+    bash .scripts/docker/up:server --silent
+    EXEC="bash /srv/www/api/.scripts/run format:black"
+    eval $"$PREFIX $DOCKER_COMPOSE exec server $EXEC"
     exit 0
 fi
 
 if [ $CMD = "api:format:isort" ]; then
     source .scripts/docker/get:compose
-    bash .scripts/docker/up:dev --silent
-    EXEC="bash /app/api/.scripts/run format:black"
-    eval $"$PREFIX $DOCKER_COMPOSE exec api $EXEC"
+    bash .scripts/docker/up:server --silent
+    EXEC="bash /srv/www/api/.scripts/run format:isort"
+    eval $"$PREFIX $DOCKER_COMPOSE exec server $EXEC"
     exit 0
 fi
 

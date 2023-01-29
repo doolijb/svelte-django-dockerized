@@ -23,14 +23,14 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
     the EmailAddress model.
     """
 
-    username = models.CharField(_("username"), max_length=30, unique=True)
-    first_name = models.CharField(_("first name"), max_length=30, blank=True)
-    last_name = models.CharField(_("last name"), max_length=30, blank=True)
-    is_active = models.BooleanField(_("active"), default=True)
+    username = models.CharField(_('username'), max_length=30, unique=True)
+    first_name = models.CharField(_('first name'), max_length=30, blank=True)
+    last_name = models.CharField(_('last name'), max_length=30, blank=True)
+    is_active = models.BooleanField(_('active'), default=True)
 
     objects = UserManager()
 
-    USERNAME_FIELD = "username"
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
     class Meta:
@@ -38,9 +38,9 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
         Meta options for the User model.
         """
 
-        verbose_name = _("user")
-        verbose_name_plural = _("users")
-        ordering = ["-created_at"]
+        verbose_name = _('user')
+        verbose_name_plural = _('users')
+        ordering = ['-created_at']
 
     def __str__(self):
         """String representation of the User model."""
@@ -49,7 +49,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
     @property
     def full_name(self):
         """Return the first_name plus the last_name, with a space in between."""
-        return self.first_name + " " + self.last_name
+        return self.first_name + ' ' + self.last_name
 
     @property
     def short_name(self):
@@ -59,29 +59,29 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
 
 class EmailAddress(BaseModel, DatesMixin):
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="email_addresses"
+        User, on_delete=models.CASCADE, related_name='email_addresses'
     )
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
     is_primary = models.BooleanField(default=False)
     redeemable_keys = GenericRelation(
-        "account.RedeemableKey", related_query_name="redeemable"
+        'account.RedeemableKey', related_query_name='redeemable'
     )
 
     objects = EmailAddressManager()
 
     class Meta:
-        unique_together = ("user", "email")
-        ordering = ["-created_at"]
+        unique_together = ('user', 'email')
+        ordering = ['-created_at']
         indexes = [
             models.Index(
-                name="user_primary_email_address_idx",
-                fields=["user", "is_primary"],
+                name='user_primary_email_address_idx',
+                fields=['user', 'is_primary'],
                 condition=models.Q(is_primary=True),
             )
         ]
 
-    test = "test"
+    test = 'test'
 
     def __str__(self):
         return self.email
@@ -106,9 +106,9 @@ class EmailAddress(BaseModel, DatesMixin):
         if there are no other email addresses associated with the user.
         """
         if self.is_primary:
-            raise ValueError(_("Cannot delete primary email address."))
+            raise ValueError(_('Cannot delete primary email address.'))
         if self.user.email_addresses.count() == 1:
-            raise ValueError(_("Cannot delete only email address."))
+            raise ValueError(_('Cannot delete only email address.'))
         super().delete(*args, **kwargs)
 
 
@@ -118,13 +118,13 @@ class RedeemableKey(BaseModel, DatesMixin):
     """
 
     user = models.ForeignKey(
-        "account.User", on_delete=models.CASCADE, null=True, blank=True
+        'account.User', on_delete=models.CASCADE, null=True, blank=True
     )
     redeemable_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     redeemable_uuid = models.UUIDField()
     redeemable = GenericForeignKey(
-        "redeemable_content_type",
-        "redeemable_uuid",
+        'redeemable_content_type',
+        'redeemable_uuid',
     )
     date_expires = models.DateTimeField(null=True, blank=True)
     date_redeemed = models.DateTimeField(null=True, blank=True)
@@ -133,9 +133,9 @@ class RedeemableKey(BaseModel, DatesMixin):
 
     class Meta:
         indexes = [
-            models.Index(fields=["redeemable_content_type", "redeemable_uuid"]),
+            models.Index(fields=['redeemable_content_type', 'redeemable_uuid']),
         ]
-        ordering = ["-created_at"]
+        ordering = ['-created_at']
 
     def __str__(self):
         return str(self.id)
@@ -172,17 +172,17 @@ class RedeemableKey(BaseModel, DatesMixin):
         """
 
         if not user == self.user:
-            raise ValueError(_("No such key for user."))
+            raise ValueError(_('No such key for user.'))
 
         if self.redeemed:
-            raise ValueError(_("Key has already been redeemed."))
+            raise ValueError(_('Key has already been redeemed.'))
 
         if self.is_expired:
-            raise ValueError(_("Key has expired."))
+            raise ValueError(_('Key has expired.'))
 
         redeem_method = getattr(
             self,
-            f"redeem_{self.redeemable_content_type.app_label}_{self.redeemable_content_type.model}",
+            f'redeem_{self.redeemable_content_type.app_label}_{self.redeemable_content_type.model}',
             None,
         )
 
@@ -217,10 +217,10 @@ class RedeemableKey(BaseModel, DatesMixin):
         """Redeems an EmailAddress object."""
 
         if type(self.redeemable) is not EmailAddress:
-            raise ValueError(_("Redeemable is not an EmailAddress."))
+            raise ValueError(_('Redeemable is not an EmailAddress.'))
 
         if not user == self.redeemable.user:
-            raise ValueError(_("User does not own EmailAddress."))
+            raise ValueError(_('User does not own EmailAddress.'))
 
         self.redeemable.is_verified = True
         self.redeemable.is_primary = True

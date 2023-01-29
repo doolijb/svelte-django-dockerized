@@ -1,9 +1,4 @@
 #! bin/bash
-
-# Directory must be /app/api
-if [ ! -d "/app/api" ]; then
-    echo "Please run from /app/api"
-    exit 1
-fi
-
-black ./**/*.py
+bash .scripts/utils/check_dir
+bash .scripts/utils/server_is_dev
+black **/*.py

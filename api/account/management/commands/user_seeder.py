@@ -8,23 +8,23 @@ class Command(BaseCommand):
     Seeds the database with random users.
     """
 
-    help = "Seeds the database with random users."
+    help = 'Seeds the database with random users.'
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "-c",
-            "--count",
+            '-c',
+            '--count',
             type=int,
             default=10,
-            help="The number of users to create.",
+            help='The number of users to create.',
         )
 
     def handle(self, *args, **options):
 
         # Arguments
-        count = options["count"]
+        count = options['count']
 
-        self.stdout.write(f"Creating {count} random users...")
+        self.stdout.write(f'Creating {count} random users...')
 
         with atomic():
 
@@ -32,4 +32,4 @@ class Command(BaseCommand):
             for _ in range(count):
                 UserFactory()
 
-        self.stdout.write(self.style.SUCCESS("Done."))
+        self.stdout.write(self.style.SUCCESS('Done.'))

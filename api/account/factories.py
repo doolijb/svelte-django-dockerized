@@ -14,7 +14,7 @@ from account.managers import EmailAddressManager
 ###
 
 User = get_user_model()
-EmailAddress = apps.get_model("account", "EmailAddress")
+EmailAddress = apps.get_model('account', 'EmailAddress')
 
 ###
 # Factories
@@ -31,10 +31,10 @@ class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = User
 
-    username = factory.Faker("user_name") if settings.ENABLE_USERNAMES else ""
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
-    password = factory.PostGenerationMethodCall("set_password", "password")
+    username = factory.Faker('user_name') if settings.ENABLE_USERNAMES else ''
+    first_name = factory.Faker('first_name')
+    last_name = factory.Faker('last_name')
+    password = factory.PostGenerationMethodCall('set_password', 'password')
 
     @factory.post_generation
     def email_addresses(user, create, extracted):
@@ -51,14 +51,16 @@ class UserFactory(factory.django.DjangoModelFactory):
 
         # Create the email addresses
         for email_address in email_addresses:
-            email_address['user'] =  user
-            email_address.setdefault("email", factory.Faker("email"))
-            email_address.setdefault("is_primary", (not has_primary))
-            has_primary: bool = has_primary if has_primary else email_address["is_primary"]
+            email_address['user'] = user
+            email_address.setdefault('email', factory.Faker('email'))
+            email_address.setdefault('is_primary', (not has_primary))
+            has_primary: bool = (
+                has_primary if has_primary else email_address['is_primary']
+            )
 
             # If we have more than one email, then the primary email is verified
             if len(email_addresses) > 1 and not has_primary:
-                email_address.setdefault("is_verified", True)
+                email_address.setdefault('is_verified', True)
             EmailAddressFactory(**email_address)
 
 
@@ -71,6 +73,6 @@ class EmailAddressFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = EmailAddress
 
-    email = factory.Faker("email")
+    email = factory.Faker('email')
     # Verified 75% of the time by default
     is_verified = bool(int(random.random() <= 0.75))

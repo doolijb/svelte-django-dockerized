@@ -1,63 +1,125 @@
-# #! bin/bash
+#! bin/bash
 
-# Make sure excuted with bash and not sh
+# # # # # # # # # # # # # # # #
+# SAFETY CHECKS               #
+# # # # # # # # # # # # # # # #
+
+CMD=$1
+
 if [ -z "$BASH_VERSION" ]; then
     echo "Please run with bash"
     exit 1
 fi
 
-# Make sure we are in the root directory
-cd /srv/www/api
-
-# First argument is the command to run
-CMD="$1"
-
-# If no script is provided, exit
 if [ -z CMD ]; then
     echo "No command name provided"
     exit 1
 fi
 
-# Set defaults flag values
-DETACH=''
+# # # # # # # # # # # # # # # #
+# CD AND ACTIVATE VENV        #
+# # # # # # # # # # # # # # # #
 
-# Check rest of arguments for -d --silent --quiet flags
+cd /srv/www/api
+# Activate the venv
+eval ". venv/bin/activate"
+
+# # # # # # # # # # # # # # # #
+# PARSE COMMAND               #
+# # # # # # # # # # # # # # # #
+
+# Get lengh of command namespaces, : delimited
+CMD_LEN=$(echo $CMD | awk -F: '{print NF}')
+NAMESPACE=""
+SCRIPT=""
+
+if [ $CMD_LEN -eq 1 ]; then
+    SCRIPT=$CMD
+else
+    NAMESPACE=$(echo $CMD | cut -d: -f1)
+    SCRIPT=$(echo $CMD | cut -d: -f2)
+fi
+
+# # # # # # # # # # # # # # # #
+# PARSE ARGS                  #
+# # # # # # # # # # # # # # # #
+
+PREFIX=""
+SUFFIX=""
+
 shift
 while [ $# -gt 0 ]; do
+    # Silent flags
     case "$1" in
         -d | -s | --detach | --silent)
-            DETACH='nohup'
+            PREFIX=$"nohup $PREFIX"
             ;;
         *)
-            echo "Unknown flag: $1"
-            exit 1
-            ;;
+    # Else, add to suffix
+    SUFFIX="$SUFFIX $1"
+    ;;
     esac
     shift
 done
 
-# Build prefix with appropriate flags if they exist
-PREFIX="$DETACH"
+# # # # # # # # # # # # # # # #
+# EXTERNAL SCRIPTS            #
+# # # # # # # # # # # # # # # #
 
-# format:black
-if [ $CMD = "format:black" ]; then
-  eval $"$PREFIX bash .scripts/format/black"
-  exit 0
-fi
-
-# format:isort
-if [ $CMD = "format:isort" ]; then
-  eval $"$PREFIX bash .scripts/format/isort"
-  exit 0
-fi
-
-# serve
-if [ $CMD = "serve" ]; then
-    eval "npx kill-port 8000"
-    eval ". venv/bin/activate"
-    eval $"$PREFIX python manage.py runserver 0.0.0.0:8000"
+if [ ! -z $NAMESPACE ]; then
+    # If script is not found, exit
+    if [ ! -f ".scripts/$NAMESPACE/$SCRIPT" ]; then
+        echo "Command not found: $NAMESPACE/$SCRIPT"
+        exit 1
+    fi
+    eval $"$PREFIX bash .scripts/$NAMESPACE/$SCRIPT"
     exit 0
 fi
+
+# # # # # # # # # # # # # # # #
+# INTERNAL SCRIPTS            #
+# # # # # # # # # # # # # # # #
+
+if [ $SCRIPT = "help" ]; then
+    bash .scripts/utils/help
+    exit 0
+fi
+
+if [ $SCRIPT = "serve" ]; then
+    bash .scripts/utils/server_is_dev
+    eval "npx kill-port 8080"
+    eval $"$PREFIX python manage.py runserver 0.0.0.0:8080"
+    exit 0
+fi
+
+if [ $SCRIPT = "shell" ]; then
+    eval $"$PREFIX python manage.py shell $SUFFIX"
+    exit 0
+fi
+
+if [ $SCRIPT = "test" ]; then
+    eval $"$PREFIX python manage.py test $SUFFIX"
+    exit 0
+fi
+
+if [ $SCRIPT = "migrate" ]; then
+    eval $"$PREFIX python manage.py migrate $SUFFIX"
+    exit 0
+fi
+
+if [ $SCRIPT = "cmd" ]; then
+    eval $"$PREFIX python manage.py $SUFFIX"
+    exit 0
+fi
+
+if [ $SCRIPT = "pip" ]; then
+    eval $"$PREFIX pip $SUFFIX"
+    exit 0
+fi
+
+# # # # # # # # # # # # # # # #
+# END OF FILE - CMD NOT FOUND #
+# # # # # # # # # # # # # # # #
 
 # If script is not found, exit
 echo "Command not found: $CMD"

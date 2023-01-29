@@ -13,21 +13,22 @@ class CurrentUserSerializer(serializers.ModelSerializer):
     """
     Serializes the authenticated user with their email addresses, or returns a generic unauthenticated user object.
     """
+
     instance: EmailAddress
     email_addresses = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = [
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email_addresses",
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'email_addresses',
         ]
         read_only_fields = [
-            "id",
-            "username",
+            'id',
+            'username',
         ]
 
     def get_email_addresses(self, instance):
@@ -43,7 +44,7 @@ class CurrentUserSerializer(serializers.ModelSerializer):
         """
         return super().to_representation(instance) if instance.is_authenticated else {}
 
-    
+
 class RegisteredUserSerializer(serializers.CreateOnlyDefault):
     """
     Serializes a registered user.
@@ -52,12 +53,12 @@ class RegisteredUserSerializer(serializers.CreateOnlyDefault):
     email_address = serializers.EmailField()
 
     instance: EmailAddress
-    
+
     class Meta:
         model = User
         fields = []
         if settings.ENABLE_USERNAMES:
-            fields += ["username"]   
+            fields += ['username']
 
 
 # class EmailAddressesSerializer(serializers.ModelSerializer):
@@ -85,6 +86,7 @@ class EmailAddressSerializer(serializers.ModelSerializer):
     """
     Serializes an email address.
     """
+
     takes_context = True
 
     def __init__(self, *args, **kwargs):
@@ -92,22 +94,22 @@ class EmailAddressSerializer(serializers.ModelSerializer):
         Initialize the serializer.
         """
         super().__init__(*args, **kwargs)
-        self.request = self.context.get("request")
+        self.request = self.context.get('request')
 
     class Meta:
         model = EmailAddress
         fields = [
-            "id",
-            "email",
-            "is_verified",
-            "is_primary",
+            'id',
+            'email',
+            'is_verified',
+            'is_primary',
         ]
         read_only_fields = [
-            "id",
-            "email",
-            "is_verified",
-            "is_primary",
-            "user",
+            'id',
+            'email',
+            'is_verified',
+            'is_primary',
+            'user',
         ]
 
     def create(self, validated_data):

@@ -20,17 +20,69 @@ class Migration(migrations.Migration):
             name='User',
             fields=[
                 ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
+                (
+                    'last_login',
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name='last login'
+                    ),
+                ),
+                (
+                    'is_superuser',
+                    models.BooleanField(
+                        default=False,
+                        help_text='Designates that this user has all permissions without explicitly assigning them.',
+                        verbose_name='superuser status',
+                    ),
+                ),
+                (
+                    'id',
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('username', models.CharField(max_length=30, unique=True, verbose_name='username')),
-                ('first_name', models.CharField(blank=True, max_length=30, verbose_name='first name')),
-                ('last_name', models.CharField(blank=True, max_length=30, verbose_name='last name')),
+                (
+                    'username',
+                    models.CharField(
+                        max_length=30, unique=True, verbose_name='username'
+                    ),
+                ),
+                (
+                    'first_name',
+                    models.CharField(
+                        blank=True, max_length=30, verbose_name='first name'
+                    ),
+                ),
+                (
+                    'last_name',
+                    models.CharField(
+                        blank=True, max_length=30, verbose_name='last name'
+                    ),
+                ),
                 ('is_active', models.BooleanField(default=True, verbose_name='active')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+                (
+                    'groups',
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+                        related_name='user_set',
+                        related_query_name='user',
+                        to='auth.group',
+                        verbose_name='groups',
+                    ),
+                ),
+                (
+                    'user_permissions',
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text='Specific permissions for this user.',
+                        related_name='user_set',
+                        related_query_name='user',
+                        to='auth.permission',
+                        verbose_name='user permissions',
+                    ),
+                ),
             ],
             options={
                 'verbose_name': 'user',
@@ -41,14 +93,33 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='RedeemableKey',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
+                (
+                    'id',
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('redeemable_uuid', models.UUIDField()),
                 ('date_expires', models.DateTimeField(blank=True, null=True)),
                 ('date_redeemed', models.DateTimeField(blank=True, null=True)),
-                ('redeemable_content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    'redeemable_content_type',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to='contenttypes.contenttype',
+                    ),
+                ),
+                (
+                    'user',
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
                 'ordering': ['-created_at'],
@@ -57,13 +128,24 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EmailAddress',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
+                (
+                    'id',
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('email', models.EmailField(max_length=254, unique=True)),
                 ('is_verified', models.BooleanField(default=False)),
                 ('is_primary', models.BooleanField(default=False)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    'user',
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
                 'ordering': ['-created_at'],
@@ -71,11 +153,18 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='redeemablekey',
-            index=models.Index(fields=['redeemable_content_type', 'redeemable_uuid'], name='account_red_redeema_2a19c9_idx'),
+            index=models.Index(
+                fields=['redeemable_content_type', 'redeemable_uuid'],
+                name='account_red_redeema_2a19c9_idx',
+            ),
         ),
         migrations.AddIndex(
             model_name='emailaddress',
-            index=models.Index(condition=models.Q(('is_primary', True)), fields=['user', 'is_primary'], name='user_primary_email_address_idx'),
+            index=models.Index(
+                condition=models.Q(('is_primary', True)),
+                fields=['user', 'is_primary'],
+                name='user_primary_email_address_idx',
+            ),
         ),
         migrations.AlterUniqueTogether(
             name='emailaddress',

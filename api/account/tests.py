@@ -1,12 +1,13 @@
-from core.lib.tests import BaseApiTestCase
-
 # Import django logger
 from logging import getLogger
 
+from core.lib.tests import BaseApiTestCase
+
 logger = getLogger(__name__)
 
+
 class TokenObtainPairApiTestCase(BaseApiTestCase):
-    url_name = "tokens"
+    url_name = 'tokens'
 
     def test_post_200_for_valid_login(self):
         """
@@ -21,8 +22,8 @@ class TokenObtainPairApiTestCase(BaseApiTestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check response headers
-        self.assertIn("access", response.data)
-        self.assertIn("refresh", response.data)
+        self.assertIn('access', response.data)
+        self.assertIn('refresh', response.data)
 
     def test_post_401_for_bad_username(self):
         """
@@ -30,16 +31,16 @@ class TokenObtainPairApiTestCase(BaseApiTestCase):
         """
 
         # Send request
-        response = self.login(username="bad_username")
+        response = self.login(username='bad_username')
 
         # Check response
         self.assertEqual(response.status_code, 401)
-        self.assertNotIn("access", response.data)  # type: ignore
-        self.assertNotIn("refresh", response.data)  # type: ignore
+        self.assertNotIn('access', response.data)  # type: ignore
+        self.assertNotIn('refresh', response.data)  # type: ignore
 
 
 class RefreshTokenApiTestCase(BaseApiTestCase):
-    url_name = "tokens-refresh"
+    url_name = 'tokens-refresh'
 
     def test_post_200_for_valid_refresh_token(self):
         """
@@ -51,7 +52,7 @@ class RefreshTokenApiTestCase(BaseApiTestCase):
 
         # Make request
         request = self.factory.post(
-            self.url, data={"refresh": login_response.data["refresh"]}  # type: ignore
+            self.url, data={'refresh': login_response.data['refresh']}  # type: ignore
         )
 
         # Send request
@@ -59,8 +60,8 @@ class RefreshTokenApiTestCase(BaseApiTestCase):
 
         # Check response
         self.assertEqual(response.status_code, 200)
-        self.assertIn("access", response.data)
-        self.assertNotIn("refresh", response.data)
+        self.assertIn('access', response.data)
+        self.assertNotIn('refresh', response.data)
 
     def test_post_401_for_bad_refresh_token(self):
         """
@@ -68,7 +69,7 @@ class RefreshTokenApiTestCase(BaseApiTestCase):
         """
 
         # Make request
-        request = self.factory.post(self.url, data={"refresh": "bad_refresh"})
+        request = self.factory.post(self.url, data={'refresh': 'bad_refresh'})
         response = self.view(request)
 
         # Check response
@@ -77,7 +78,7 @@ class RefreshTokenApiTestCase(BaseApiTestCase):
 
 class VerifyTokenApiTestCase(BaseApiTestCase):
 
-    url_name = "tokens-verify"
+    url_name = 'tokens-verify'
 
     def test_post_200_for_valid_access_token(self):
         """
@@ -89,7 +90,7 @@ class VerifyTokenApiTestCase(BaseApiTestCase):
         # Make request for access token
         request = self.factory.post(
             self.url,
-            data={"token": login_response.data.get("access", "")},  # type: ignore
+            data={'token': login_response.data.get('access', '')},  # type: ignore
         )
 
         # Send request
@@ -108,7 +109,7 @@ class VerifyTokenApiTestCase(BaseApiTestCase):
         # Make request for refresh token
         request = self.factory.post(
             self.url,
-            data={"token": login_response.data.get("refresh", "")},  # type: ignore
+            data={'token': login_response.data.get('refresh', '')},  # type: ignore
         )
 
         # Send request
@@ -123,7 +124,7 @@ class VerifyTokenApiTestCase(BaseApiTestCase):
         """
 
         # Make request
-        request = self.factory.post(self.url, data={"token": "bad_token"})
+        request = self.factory.post(self.url, data={'token': 'bad_token'})
 
         # Send request
         response = self.view(request)
@@ -220,14 +221,14 @@ class VerifyTokenApiTestCase(BaseApiTestCase):
 #             self.user.email_addresses.all().first().is_verified,
 #         )
 
-    # def test_post(self):
-    #     """
-    #     Tests the POST method.
-    #     """
+# def test_post(self):
+#     """
+#     Tests the POST method.
+#     """
 
-    #     # Login
-    #     login_response = self.login()
+#     # Login
+#     login_response = self.login()
 
-    #     # Make request
-    #     request = self.factory.post(self.url, data={
-    #         "email": ""
+#     # Make request
+#     request = self.factory.post(self.url, data={
+#         "email": ""

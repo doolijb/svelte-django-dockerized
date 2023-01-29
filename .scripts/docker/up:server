@@ -6,4 +6,4 @@ if [[ "$1" == "--silent" ]]; then
 fi
 
 # Use SILENT as a string to pass to docker-compose
-eval $"$DOCKER_COMPOSE up api -d $SILENT"
+eval $"$DOCKER_COMPOSE up server -d $SILENT"
