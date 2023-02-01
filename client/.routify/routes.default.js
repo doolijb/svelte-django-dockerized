@@ -16,6 +16,38 @@ export default {
   "routifyDir": import.meta.url,
   "children": [
     {
+      "meta": {},
+      "id": "_default_hello_world_md",
+      "_regex": {},
+      "_paramKeys": {},
+      "name": "hello-world",
+      "file": {
+        "path": "src/routes/hello-world.md",
+        "dir": "src/routes",
+        "base": "hello-world.md",
+        "ext": ".md",
+        "name": "hello-world"
+      },
+      "asyncModule": () => import('../src/routes/hello-world.md'),
+      "children": []
+    },
+    {
+      "meta": {},
+      "id": "_default_index_md",
+      "_regex": {},
+      "_paramKeys": {},
+      "name": "index",
+      "file": {
+        "path": "src/routes/index.md",
+        "dir": "src/routes",
+        "base": "index.md",
+        "ext": ".md",
+        "name": "index"
+      },
+      "asyncModule": () => import('../src/routes/index.md'),
+      "children": []
+    },
+    {
       "meta": {
         "dynamic": true,
         "dynamicSpread": true

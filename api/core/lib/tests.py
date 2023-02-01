@@ -1,5 +1,5 @@
 from django.test import TestCase
-from account.factories import UserFactory
+from account.lib.factories import UserFactory
 from rest_framework.test import APIRequestFactory
 from ..urls import urlpatterns
 

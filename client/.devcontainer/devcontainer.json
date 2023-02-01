@@ -12,11 +12,11 @@
         "haugerbr.project-tasks",
         "redhat.vscode-yaml"
     ],
-    "name": "creatorportal-client",
+    "name": "client",
     "overrideCommand": true,
     "service": "client",
     "settings": {
         "remote.autoForwardPorts": false
     },
-    "workspaceFolder": "/app/client"
+    "workspaceFolder": "/srv/www/client"
 }

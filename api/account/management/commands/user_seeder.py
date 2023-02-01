@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from ...factories import UserFactory
+from ...lib.factories import UserFactory
 from django.db.transaction import atomic
 
 

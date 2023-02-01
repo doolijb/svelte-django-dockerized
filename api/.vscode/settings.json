@@ -12,18 +12,22 @@
     "editor.formatOnSave": true,
     "editor.insertSpaces": true,
     "editor.tabSize": 4,
+    "isort.interpreter": [
+        "python3.11"
+    ],
     "python.analysis.autoImportCompletions": true,
     "python.analysis.completeFunctionParens": true,
     "python.analysis.importFormat": "absolute",
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.inlayHints.variableTypes": true,
     "python.analysis.typeCheckingMode": "basic",
-    "python.defaultInterpreterPath": "/srv/www/api/venv/binpython",
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
     "python.formatting.blackPath": "black",
     "python.formatting.provider": "black",
     "python.globalModuleInstallation": false,
     "python.languageServer": "Pylance",
     "python.linting.enabled": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
     "remote.autoForwardPorts": false,
     "task.problemMatchers.neverPrompt": true
 }

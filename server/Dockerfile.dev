@@ -1,25 +1,51 @@
-# pull official base image
-# FROM python:3.10-slim
-FROM nginx/unit:1.28.0-python3.10
+# # # # # # # # # # # # # # # # # # #
+# NOTES:                            #
+# # # # # # # # # # # # # # # # # # #
+#
+# This is a development container.
+#
+# For development, the Django api is
+# ran manually from /srv/www/api with
+# the manage.py script.
+#
+# For production, the Django api is
+# served natively through NGINX Unit.
 
 # # # # # # # # # # # # # # # # # # #
-# DEV ONLY ENV VARIABLES            #
+# BASE IMAGE                        #
 # # # # # # # # # # # # # # # # # # #
 
-# Keeps Python from generating .pyc files in the container
-ENV PYTHONDONTWRITEBYTECODE=1
-# Turns off buffering for easier container logging
-ENV PYTHONUNBUFFERED=1
+FROM nginx/unit:1.29.0-python3.11
 
-# # # # # # # # # # # # # # # # # # #
-# INSTALL LINUX DEPENCENDIES        #
-# # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # #
+# # DEV ONLY ENV VARIABLES            #
+# # # # # # # # # # # # # # # # # # # #
 
-RUN apt-get update \
-    && apt-get install -y libpq5 gcc python3-dev musl-dev libfreetype-dev npm
+# # Keeps Python from generating .pyc files in the container
+# ENV PYTHONDONTWRITEBYTECODE=1
+# # Turns off buffering for easier container logging
+# ENV PYTHONUNBUFFERED=1
+
+# # # # # # # # # # # # # # # # # # # #
+# # INSTALL LINUX DEPENCENDIES        #
+# # # # # # # # # # # # # # # # # # # #
+
+RUN apt update \
+    && apt install -y libpq5 gcc musl-dev libfreetype-dev npm
 
 # Install kill-port globaly
 RUN npm install -g kill-port
+
+# RUN apt update
+# RUN rm -f /etc/ssl/certs/ca-bundle.crt
+# RUN apt-get reinstall -y ca-certificates
+# RUN update-ca-certificates
+# RUN curl --output /usr/share/keyrings/nginx-keyring.gpg  \
+#       https://unit.nginx.org/keys/nginx-keyring.gpg
+# RUN echo "deb [signed-by=/usr/share/keyrings/nginx-keyring.gpg] https://packages.nginx.org/unit/debian/ bullseye unit" \
+#       | tee /etc/apt/sources.list.d/unit.list
+# RUN apt-get update && apt-get install -y unit-dev
+# RUN apt-get install unit-python3.9
 
 # # # # # # # # # # # # # # # # # # #
 #  COPY API FILES TO CONTAINER      #
@@ -34,8 +60,10 @@ COPY ../api/requirements.dev.txt .
 # # # # # # # # # # # # # # # # # # #
 
 # Create python virtual environment
-RUN python3.10 -m venv venv
-RUN . venv/bin/activate
+# RUN rm -rf venv
+# RUN pip install virtualenv
+# RUN virtualenv -p python3.11 venv
+# RUN . venv/bin/activate
 # Install required python dependencies
 RUN pip install -r requirements.base.txt
 # Install dev python dependencies
@@ -45,13 +73,13 @@ RUN pip install -r requirements.dev.txt
 # COPY THE NGINX UNIT CONFIG        #
 # # # # # # # # # # # # # # # # # # #
 
-COPY ../server/unit.conf.dev /var/lib/unit/conf.json
+COPY ../server/unit.conf.dev.json /var/lib/unit/conf.json
 
 # # # # # # # # # # # # # # # # # # #
 # OPEN CONTAINER PORTS              #
 # # # # # # # # # # # # # # # # # # #
 
-# Expose application port
+# Expose application port ( represents port 80 in production )
 EXPOSE 8000
-# Expose unitd api port ( For development only )
+# Expose unitd api port ( do not expose to the internet! )
 EXPOSE 8090

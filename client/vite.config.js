@@ -10,17 +10,17 @@ export default defineConfig({
 
     plugins: [
         routify({
-            ssr: { enable: false }
+            ssr: { enable: false },
         }),
         svelte({
             compilerOptions: {
                 dev: !production,
-                hydratable: !!process.env.ROUTIFY_SSR_ENABLE
+                hydratable: !!process.env.ROUTIFY_SSR_ENABLE,
             },
             extensions: ['.md', '.svelte'],
-            preprocess: [mdsvex({ extension: 'md' })]
-        })
+            preprocess: [mdsvex({ extension: 'md' })],
+        }),
     ],
 
-    server: { port: 1337 }
+    server: { port: 1337 },
 })

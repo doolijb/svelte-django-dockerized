@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from faker import Faker
 
-from account.managers import EmailAddressManager
+from account.lib.managers import EmailAddressManager
 
 ###
 # Models

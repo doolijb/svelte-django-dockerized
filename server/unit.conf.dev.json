@@ -1,0 +1,84 @@
+{
+    "listeners": {
+        "*:1337": {
+            "action": {
+                "location": "http://${host}${request_uri}"
+            }
+        },
+        "*:6006": {
+            "action": {
+                "location": "http://${host}/sb"
+            }
+        },
+        "*:8000": {
+            "pass": "routes"
+        }
+    },
+    "routes": [
+        {
+            "action": {
+                "proxy": "http://172.20.0.60:6006"
+            },
+            "match": {
+                "uri": [
+                    "/sb",
+                    "/sb/*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "proxy": "http://172.20.0.90:6006"
+            },
+            "match": {
+                "uri": [
+                    "/dev/sb*",
+                    "dev/storybook*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "share": "/srv/www/server/readme.md"
+            },
+            "match": {
+                "uri": [
+                    "/dev/readme.md"
+                ]
+            }
+        },
+        {
+            "action": {
+                "share": "/srv/www/server/dev_html/index.html"
+            },
+            "match": {
+                "uri": [
+                    "/dev/*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "proxy": "http://127.0.0.1:8080"
+            },
+            "match": {
+                "uri": [
+                    "/api*",
+                    "/static*"
+                ]
+            }
+        },
+        {
+            "action": {
+                "proxy": "http://172.20.0.90:1337"
+            },
+            "match": {
+                "uri": [
+                    "*",
+                    "/*",
+                    "/static*"
+                ]
+            }
+        }
+    ]
+}

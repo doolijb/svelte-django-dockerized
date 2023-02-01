@@ -10,13 +10,17 @@ from django.db import models
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from typing import Any, Optional, Type, TypeVar, Literal, Generic, Union, cast
 
-from core.lib.models import BaseModel, DatesMixin
+from core.lib.models import AbstractModel
+from core.lib.model_mixins import HasUuidId, HasTimestamps
 
-from .managers import EmailAddressManager, UserManager
+from .lib.managers import EmailAddressManager, UserManager
+from .lib.model_mixins import IsRedeemable, IsRedeemer
+from .lib.enums import EmailConfirmedChoices
 
 
-class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
+class User(AbstractBaseUser, HasUuidId, HasTimestamps, PermissionsMixin, IsRedeemer):
     """
     Model representing an authenticable user. Compared to the default Django
     user model, this User has no email field. Instead, it is closely tied to
@@ -28,7 +32,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
     last_name = models.CharField(_('last name'), max_length=30, blank=True)
     is_active = models.BooleanField(_('active'), default=True)
 
-    objects = UserManager()
+    objects: UserManager = UserManager()
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
@@ -38,55 +42,53 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin, DatesMixin):
         Meta options for the User model.
         """
 
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
-        ordering = ['-created_at']
+        verbose_name: str = _('user')
+        verbose_name_plural: str = _('users')
+        ordering: list[str] = ['-created_at']
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String representation of the User model."""
         return self.username
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         """Return the first_name plus the last_name, with a space in between."""
         return self.first_name + ' ' + self.last_name
 
     @property
-    def short_name(self):
+    def short_name(self) -> str:
         """Return the short name for the user."""
         return self.first_name
 
 
-class EmailAddress(BaseModel, DatesMixin):
+class EmailAddress(AbstractModel, HasUuidId, HasTimestamps, IsRedeemable):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='email_addresses'
     )
     email = models.EmailField(unique=True)
-    is_verified = models.BooleanField(default=False)
+    verified_at = models.DateTimeField(null=True, blank=True)
     is_primary = models.BooleanField(default=False)
     redeemable_keys = GenericRelation(
         'account.RedeemableKey', related_query_name='redeemable'
     )
 
-    objects = EmailAddressManager()
+    objects: EmailAddressManager = EmailAddressManager()
 
     class Meta:
-        unique_together = ('user', 'email')
-        ordering = ['-created_at']
-        indexes = [
+        unique_together: tuple[Literal['user'], Literal['email']]
+        ordering: tuple[Literal['-created_at']]
+        indexes: tuple[models.Index] = (
             models.Index(
                 name='user_primary_email_address_idx',
-                fields=['user', 'is_primary'],
+                fields=('user', 'is_primary',),
                 condition=models.Q(is_primary=True),
-            )
-        ]
+            ),
+        )
 
-    test = 'test'
-
-    def __str__(self):
+    def __str__(self) -> str:
         return self.email
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """
         EmailAddress save method.
         If settings.ENABLE_USERNAMES is False, the username will be set to the
@@ -107,123 +109,93 @@ class EmailAddress(BaseModel, DatesMixin):
         """
         if self.is_primary:
             raise ValueError(_('Cannot delete primary email address.'))
-        if self.user.email_addresses.count() == 1:
+        if self.user.email_addresses.count() == 1: # type: ignore
             raise ValueError(_('Cannot delete only email address.'))
         super().delete(*args, **kwargs)
 
+    def redeem_by_redeemer(self, redeemer:"IsRedeemable", *args, **kwargs) -> bool:
+        match type(redeemer):
+            case User.__class__:
+                self.confirmed_at=timezone.now()
+                self.save()
+                return True
+            case _:
+                raise ValueError(_(f'Redeemer type {type(redeemer)} not supported.'))
 
-class RedeemableKey(BaseModel, DatesMixin):
+
+class RedeemableKey(AbstractModel, HasUuidId, HasTimestamps):
     """
     Provides a redeemable key for a given polymorphic model and user.
     """
 
-    user = models.ForeignKey(
-        'account.User', on_delete=models.CASCADE, null=True, blank=True
-    )
-    redeemable_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    redeemer_content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE, related_name='redeemer_keys')
+    redeemer_uuid = models.UUIDField(null=True)
+    redeemer = GenericForeignKey('redeemer_content_type','redeemer_uuid')
+    redeemable_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='redeemable_keys')
     redeemable_uuid = models.UUIDField()
-    redeemable = GenericForeignKey(
-        'redeemable_content_type',
-        'redeemable_uuid',
-    )
-    date_expires = models.DateTimeField(null=True, blank=True)
-    date_redeemed = models.DateTimeField(null=True, blank=True)
+    redeemable = GenericForeignKey('redeemable_content_type','redeemable_uuid')
+    expires_at = models.DateTimeField(null=True, blank=True)
+    redeemed_at = models.DateTimeField(null=True, blank=True)
 
     objects = models.Manager()
 
     class Meta:
-        indexes = [
+        indexes: list[models.Index] = [
             models.Index(fields=['redeemable_content_type', 'redeemable_uuid']),
         ]
-        ordering = ['-created_at']
+        ordering: list[str] = ['-created_at']
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.id)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         # TODO
         super().save(*args, **kwargs)
 
     @property
-    def is_expired(self):
+    def is_expired(self) -> bool:
         """Returns whether the key has expired or not."""
-        if self.date_expires:
-            return self.date_expires < timezone.now()
-        return False
+        return self.date_expires < timezone.now()
 
-    @property
-    def is_redeemed(self):
-        """Returns whether the key has been redeemed or not."""
-        return self.date_redeemed is not None
 
-    def expire(self):
+    def expire(self) -> None:
         """Expires the key."""
-        self.date_expires = timezone.now()
+        self.date_expires: timezone.datetime = timezone.now()
         self.save()
 
-    def redeem(self, user, *args, **kwargs):
+    def redeem(self, *args, **kwargs) -> bool:
         """
-        Performs activation for a user and redeemable object.
+        Performs activation on the redeemable.
 
-        Checks if self has redeem method matching redeemable_content_type app and model, else raises NotImplemented.
-        I.E. `redeem_account_emailaddress` for EmailAddress model.
-
-        Returns True if successful, False otherwise.
+        @return: True if activation was successful, False otherwise.
         """
-
-        if not user == self.user:
-            raise ValueError(_('No such key for user.'))
-
-        if self.redeemed:
+        if self.redeemed_at:
             raise ValueError(_('Key has already been redeemed.'))
-
         if self.is_expired:
             raise ValueError(_('Key has expired.'))
-
-        redeem_method = getattr(
-            self,
-            f'redeem_{self.redeemable_content_type.app_label}_{self.redeemable_content_type.model}',
-            None,
-        )
-
-        if not redeem_method or not callable(redeem_method):
-            raise NotImplementedError(
-                _(
-                    f"""Redeem method not implemented, no such method:
-                redeem_{self.redeemable_content_type.app_label}_{self.redeemable_content_type.model}
-                """
-                )
-            )
-
-        # Multiple database transactions are required for this method, so we
-        # wrap it in an atomic block.
         with atomic():
-
-            success = redeem_method(user, *args, **kwargs)
-
+            success: bool = cast(IsRedeemable, self.redeemable).redeem(key=self, *args, **kwargs);
             if success:
-                self.redeemed = True
-                self.date_redeemed = timezone.now()
-                self.save()
+                self.redeemed_at=timezone.now()
                 return True
-
         return False
 
-    ###
-    # Redeemable redeem methods
-    ###
+    def redeem_by_redeemer(self, key:"RedeemableKey", redeemer:"IsRedeemer", *args, **kwargs) -> bool:
+        """
+        Performs activation on the redeemable on behalf of a redeemer.
 
-    def redeem_account_emailaddress(self, user, *args, **kwargs):
-        """Redeems an EmailAddress object."""
-
-        if type(self.redeemable) is not EmailAddress:
-            raise ValueError(_('Redeemable is not an EmailAddress.'))
-
-        if not user == self.redeemable.user:
-            raise ValueError(_('User does not own EmailAddress.'))
-
-        self.redeemable.is_verified = True
-        self.redeemable.is_primary = True
-        self.redeemable.save()
-        self.save()
-        return True
+        @return: True if activation was successful, False otherwise.
+        """
+        if self.redeemed_at:
+            raise ValueError(_('Key has already been redeemed.'))
+        if self.is_expired:
+            raise ValueError(_('Key has expired.'))
+        if not self.redeemer == redeemer:
+            raise ValueError(_('Redeemer does not own key.'))
+        with atomic():
+            success: bool = cast(IsRedeemable, self.redeemable).redeem_by_redeemer(key=self, redeemer=redeemer, *args, **kwargs);
+            if success:
+                self.redeemed_at=timezone.now()
+                self.save()
+                return True
+        return False

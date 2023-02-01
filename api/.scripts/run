@@ -17,12 +17,13 @@ if [ -z CMD ]; then
 fi
 
 # # # # # # # # # # # # # # # #
-# CD AND ACTIVATE VENV        #
+# CD AND GET INTERPETER       #
 # # # # # # # # # # # # # # # #
 
 cd /srv/www/api
 # Activate the venv
 eval ". venv/bin/activate"
+PYTHON = "python3.11"
 
 # # # # # # # # # # # # # # # #
 # PARSE COMMAND               #
@@ -88,27 +89,27 @@ fi
 if [ $SCRIPT = "serve" ]; then
     bash .scripts/utils/server_is_dev
     eval "npx kill-port 8080"
-    eval $"$PREFIX python manage.py runserver 0.0.0.0:8080"
+    eval $"$PREFIX $PYTHON manage.py runserver 0.0.0.0:8080"
     exit 0
 fi
 
 if [ $SCRIPT = "shell" ]; then
-    eval $"$PREFIX python manage.py shell $SUFFIX"
+    eval $"$PREFIX $PYTHON manage.py shell $SUFFIX"
     exit 0
 fi
 
 if [ $SCRIPT = "test" ]; then
-    eval $"$PREFIX python manage.py test $SUFFIX"
+    eval $"$PREFIX $PYTHON manage.py test $SUFFIX"
     exit 0
 fi
 
 if [ $SCRIPT = "migrate" ]; then
-    eval $"$PREFIX python manage.py migrate $SUFFIX"
+    eval $"$PREFIX $PYTHON manage.py migrate $SUFFIX"
     exit 0
 fi
 
 if [ $SCRIPT = "cmd" ]; then
-    eval $"$PREFIX python manage.py $SUFFIX"
+    eval $"$PREFIX $PYTHON manage.py $SUFFIX"
     exit 0
 fi
 
