@@ -15,16 +15,17 @@
 # BASE IMAGE                        #
 # # # # # # # # # # # # # # # # # # #
 
+# Use the NGINX Unit image, which is based on Debian
 FROM nginx/unit:1.29.0-python3.11
 
 # # # # # # # # # # # # # # # # # # # #
 # # DEV ONLY ENV VARIABLES            #
 # # # # # # # # # # # # # # # # # # # #
 
-# # Keeps Python from generating .pyc files in the container
-# ENV PYTHONDONTWRITEBYTECODE=1
-# # Turns off buffering for easier container logging
-# ENV PYTHONUNBUFFERED=1
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
 
 # # # # # # # # # # # # # # # # # # # #
 # # INSTALL LINUX DEPENCENDIES        #
@@ -36,16 +37,6 @@ RUN apt update \
 # Install kill-port globaly
 RUN npm install -g kill-port
 
-# RUN apt update
-# RUN rm -f /etc/ssl/certs/ca-bundle.crt
-# RUN apt-get reinstall -y ca-certificates
-# RUN update-ca-certificates
-# RUN curl --output /usr/share/keyrings/nginx-keyring.gpg  \
-#       https://unit.nginx.org/keys/nginx-keyring.gpg
-# RUN echo "deb [signed-by=/usr/share/keyrings/nginx-keyring.gpg] https://packages.nginx.org/unit/debian/ bullseye unit" \
-#       | tee /etc/apt/sources.list.d/unit.list
-# RUN apt-get update && apt-get install -y unit-dev
-# RUN apt-get install unit-python3.9
 
 # # # # # # # # # # # # # # # # # # #
 #  COPY API FILES TO CONTAINER      #
@@ -59,11 +50,6 @@ COPY ../api/requirements.dev.txt .
 # INSTALL PYTHON ENVIRONMENT        #
 # # # # # # # # # # # # # # # # # # #
 
-# Create python virtual environment
-# RUN rm -rf venv
-# RUN pip install virtualenv
-# RUN virtualenv -p python3.11 venv
-# RUN . venv/bin/activate
 # Install required python dependencies
 RUN pip install -r requirements.base.txt
 # Install dev python dependencies

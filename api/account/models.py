@@ -10,31 +10,39 @@ from django.db import models
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from typing import Any, Optional, Type, TypeVar, Literal, Generic, Union, cast
+from typing import Literal, cast, Union
 
-from core.lib.models import AbstractModel
-from core.lib.model_mixins import HasUuidId, HasTimestamps
+from core.lib.model_mixins import HasUuidId, HasTimestamps, HasSoftDelete
 
 from .lib.managers import EmailAddressManager, UserManager
-from .lib.model_mixins import IsRedeemable, IsRedeemer
-from .lib.enums import EmailConfirmedChoices
+from .lib.model_mixins import IsEmailable, IsRedeemable, IsRedeemer
 
 
-class User(AbstractBaseUser, HasUuidId, HasTimestamps, PermissionsMixin, IsRedeemer):
+class User(
+    HasUuidId,
+    HasTimestamps,
+    PermissionsMixin,
+    IsEmailable,
+    IsRedeemer,
+    AbstractBaseUser,
+    models.Model
+):
     """
     Model representing an authenticable user. Compared to the default Django
     user model, this User has no email field. Instead, it is closely tied to
     the EmailAddress model.
     """
 
-    username = models.CharField(_('username'), max_length=30, unique=True)
-    first_name = models.CharField(_('first name'), max_length=30, blank=True)
-    last_name = models.CharField(_('last name'), max_length=30, blank=True)
-    is_active = models.BooleanField(_('active'), default=True)
+    username = models.CharField(_("username"), max_length=30, unique=True)
+    first_name = models.CharField(_("first name"), max_length=30, blank=True)
+    last_name = models.CharField(_("last name"), max_length=30, blank=True)
+    is_active = models.BooleanField(_("active"), default=True)
+    is_staff = models.BooleanField(_("staff status"), default=False)
+    is_superuser = models.BooleanField(_("superuser status"), default=False)
 
     objects: UserManager = UserManager()
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
 
     class Meta:
@@ -42,9 +50,15 @@ class User(AbstractBaseUser, HasUuidId, HasTimestamps, PermissionsMixin, IsRedee
         Meta options for the User model.
         """
 
-        verbose_name: str = _('user')
-        verbose_name_plural: str = _('users')
-        ordering: list[str] = ['-created_at']
+        verbose_name: str = _("user")
+        verbose_name_plural: str = _("users")
+        ordering = ("-created_at",)
+        permissions = (
+            ("add_superuser", "Can add superuser"),
+            ("change_superuser", "Can change superuser"),
+            ("delete_superuser", "Can delete superuser"),
+            ("view_superuser", "Can view superuser"),
+        )
 
     def __str__(self) -> str:
         """String representation of the User model."""
@@ -53,7 +67,7 @@ class User(AbstractBaseUser, HasUuidId, HasTimestamps, PermissionsMixin, IsRedee
     @property
     def full_name(self) -> str:
         """Return the first_name plus the last_name, with a space in between."""
-        return self.first_name + ' ' + self.last_name
+        return self.first_name + " " + self.last_name
 
     @property
     def short_name(self) -> str:
@@ -61,29 +75,59 @@ class User(AbstractBaseUser, HasUuidId, HasTimestamps, PermissionsMixin, IsRedee
         return self.first_name
 
 
-class EmailAddress(AbstractModel, HasUuidId, HasTimestamps, IsRedeemable):
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='email_addresses'
+class Password(HasUuidId, HasTimestamps, HasSoftDelete, models.Model):
+    """
+    Model representing a password for a protected object.
+
+    The protected object is identified by a generic foreign key. The protected
+    object must implement the IsProtected interface.
+    """
+
+    protected_content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, related_name="protected"
     )
+    protected_id = models.UUIDField()
+    protected = GenericForeignKey("protected_content_type", "protected_id")
+    hash = models.CharField(max_length=128, editable=False)
+
+    objects = EmailAddressManager()
+
+    class Meta:
+        """
+        Meta options for the Password model.
+        """
+
+        verbose_name: str = _("password")
+        verbose_name_plural: str = _("passwords")
+        # ordering: list[str] = ["-created_at"]
+
+    def __str__(self) -> str:
+        """String representation of the Password model."""
+        return self.hash
+
+
+class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, models.Model):
+    emailable_content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, related_name="emailable"
+    )
+    emailable_id = models.UUIDField()
+    emailable = GenericForeignKey("emailable_content_type", "emailable_id")
     email = models.EmailField(unique=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     is_primary = models.BooleanField(default=False)
     redeemable_keys = GenericRelation(
-        'account.RedeemableKey', related_query_name='redeemable'
+        "account.RedeemableKey", related_query_name="redeemable"
     )
 
     objects: EmailAddressManager = EmailAddressManager()
 
+    @property
+    def is_verified(self) -> bool:
+        return bool(self.verified_at)
+
     class Meta:
-        unique_together: tuple[Literal['user'], Literal['email']]
-        ordering: tuple[Literal['-created_at']]
-        indexes: tuple[models.Index] = (
-            models.Index(
-                name='user_primary_email_address_idx',
-                fields=('user', 'is_primary',),
-                condition=models.Q(is_primary=True),
-            ),
-        )
+        unique_together: tuple[Literal["user"], Literal["email"]]
+        ordering = ("-created_at",)
 
     def __str__(self) -> str:
         return self.email
@@ -108,42 +152,49 @@ class EmailAddress(AbstractModel, HasUuidId, HasTimestamps, IsRedeemable):
         if there are no other email addresses associated with the user.
         """
         if self.is_primary:
-            raise ValueError(_('Cannot delete primary email address.'))
-        if self.user.email_addresses.count() == 1: # type: ignore
-            raise ValueError(_('Cannot delete only email address.'))
+            raise ValueError(_("Cannot delete primary email address."))
+        if self.user.email_addresses.count() == 1:  # type: ignore
+            raise ValueError(_("Cannot delete only email address."))
         super().delete(*args, **kwargs)
 
-    def redeem_by_redeemer(self, redeemer:"IsRedeemable", *args, **kwargs) -> bool:
-        match type(redeemer):
+    def redeem_by_redeemer(
+        self, redeemer: Union["IsRedeemable", "IsEmailable"], *args, **kwargs
+    ) -> bool:
+        assert isinstance(
+            redeemer, IsEmailable
+        ), "Redeemer must be an IsEmailable instance."
+        match redeemer.__class__:
             case User.__class__:
-                self.confirmed_at=timezone.now()
+                self.confirmed_at = timezone.now()
                 self.save()
                 return True
             case _:
-                raise ValueError(_(f'Redeemer type {type(redeemer)} not supported.'))
+                raise ValueError(_(f"Redeemer type {type(redeemer)} not supported."))
 
 
-class RedeemableKey(AbstractModel, HasUuidId, HasTimestamps):
+class RedeemableKey(HasUuidId, HasTimestamps, models.Model):
     """
-    Provides a redeemable key for a given polymorphic model and user.
+    Provides a generic way to redeem a redeemable object where a redeemer may or
+    may not be required.
     """
 
-    redeemer_content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE, related_name='redeemer_keys')
+    redeemer_content_type = models.ForeignKey(
+        ContentType, null=True, on_delete=models.CASCADE, related_name="redeemer_keys"
+    )
     redeemer_uuid = models.UUIDField(null=True)
-    redeemer = GenericForeignKey('redeemer_content_type','redeemer_uuid')
-    redeemable_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, related_name='redeemable_keys')
+    redeemer = GenericForeignKey("redeemer_content_type", "redeemer_uuid")
+    redeemable_content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, related_name="redeemable_keys"
+    )
     redeemable_uuid = models.UUIDField()
-    redeemable = GenericForeignKey('redeemable_content_type','redeemable_uuid')
+    redeemable = GenericForeignKey("redeemable_content_type", "redeemable_uuid")
     expires_at = models.DateTimeField(null=True, blank=True)
     redeemed_at = models.DateTimeField(null=True, blank=True)
 
     objects = models.Manager()
 
     class Meta:
-        indexes: list[models.Index] = [
-            models.Index(fields=['redeemable_content_type', 'redeemable_uuid']),
-        ]
-        ordering: list[str] = ['-created_at']
+        ordering = ("-created_at",)
 
     def __str__(self) -> str:
         return str(self.id)
@@ -157,45 +208,40 @@ class RedeemableKey(AbstractModel, HasUuidId, HasTimestamps):
         """Returns whether the key has expired or not."""
         return self.date_expires < timezone.now()
 
-
     def expire(self) -> None:
         """Expires the key."""
         self.date_expires: timezone.datetime = timezone.now()
         self.save()
 
     def redeem(self, *args, **kwargs) -> bool:
-        """
-        Performs activation on the redeemable.
-
-        @return: True if activation was successful, False otherwise.
-        """
         if self.redeemed_at:
-            raise ValueError(_('Key has already been redeemed.'))
+            raise ValueError(_("Key has already been redeemed."))
         if self.is_expired:
-            raise ValueError(_('Key has expired.'))
+            raise ValueError(_("Key has expired."))
         with atomic():
-            success: bool = cast(IsRedeemable, self.redeemable).redeem(key=self, *args, **kwargs);
+            success: bool = cast(IsRedeemable, self.redeemable).redeem(
+                key=self, redeemer=self.redeemer, *args, **kwargs
+            )
             if success:
-                self.redeemed_at=timezone.now()
+                self.redeemed_at = timezone.now()
                 return True
         return False
 
-    def redeem_by_redeemer(self, key:"RedeemableKey", redeemer:"IsRedeemer", *args, **kwargs) -> bool:
-        """
-        Performs activation on the redeemable on behalf of a redeemer.
-
-        @return: True if activation was successful, False otherwise.
-        """
+    def redeem_by_redeemer(
+        self, key: "RedeemableKey", redeemer: "IsRedeemer", *args, **kwargs
+    ) -> bool:
         if self.redeemed_at:
-            raise ValueError(_('Key has already been redeemed.'))
+            raise ValueError(_("Key has already been redeemed."))
         if self.is_expired:
-            raise ValueError(_('Key has expired.'))
-        if not self.redeemer == redeemer:
-            raise ValueError(_('Redeemer does not own key.'))
+            raise ValueError(_("Key has expired."))
+        if self.redeemer and self.redeemer == redeemer:
+            raise ValueError(_("Redeemer does not own the key."))
         with atomic():
-            success: bool = cast(IsRedeemable, self.redeemable).redeem_by_redeemer(key=self, redeemer=redeemer, *args, **kwargs);
+            success: bool = cast(IsRedeemable, self.redeemable).redeem_by_redeemer(
+                key=self, redeemer=redeemer, *args, **kwargs
+            )
             if success:
-                self.redeemed_at=timezone.now()
+                self.redeemed_at = timezone.now()
                 self.save()
                 return True
         return False

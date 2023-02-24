@@ -3,6 +3,7 @@
     import routes from '../.routify/routes.default.js'
 
     const router = createRouter({ routes })
+
 </script>
 
 <Router {router} />

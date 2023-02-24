@@ -1,33 +1,37 @@
-"""
-Custom model managers for the account app.
-"""
-
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import transaction
 from django.db.models import Manager
+from core.lib.manager_mixins import ManagesSoftDeletables
+from typing import Optional, TYPE_CHECKING
+from account.lib.utils import is_hashed
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import make_password
+from account.lib.model_mixins import IsPasswordProtected
+from account.lib.utils import normalize_email
+from django.db.models import Q
 
+if TYPE_CHECKING:
+    from account.models import User
 
-class UserManager(BaseUserManager):
+class UserManager(BaseUserManager, ManagesSoftDeletables):
     """
     Custom user model manager where email is the unique identifiers
     """
 
-    def create_user(self, email, is_verified=False, password=None):
+    def create_user(self, username:Optional[str]=None, email:Optional[str]=None, is_verified=False, password:Optional[str]=None, **extra_fields):
         """
         Create and save a User with the given email and password.
         """
 
-        # Transaction atomic is used to ensure that the user and email address
-        # are created in the same transaction. If the email address creation
-        # fails, the user will not be created.
         with transaction.atomic():
-            user = self.model()
-            user.set_password(password)
+            user = self.model(**extra_fields)
+            if username:
+                user.username = username
             user.save(using=self._db)
-            user.email_address_set.create(
-                email=email, is_primary=True, is_verified=is_verified
-            )
-
+            if email:
+                user.email_addresses.create(email=email, emailable=user, is_verified=is_verified)
+            if password:
+                user.passwords.create(protected=user, raw_password=password)
         return user
 
     def create_superuser(self, *args, **kwargs):
@@ -39,10 +43,43 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def get_by_primary_email(self, email):
+    def get_by_primary_email(self, email:str) -> "User":
         """Returns a user for a primary email address"""
-        EmailAddress = self.model.email_address_set.related.model
-        return EmailAddress.objects.get_by_natural_key(email).user
+        # Query email addresses for the given email and emailable type
+        return self.model.email_addresses.through.objects.get(
+            email=normalize_email(email),
+            emailable_type=self.model._meta.label
+        )
+
+    def get_by_natural_key(self, username:str):
+        """Returns a user for a username"""
+        return self.get(username=username)
+
+
+class PasswordManager(Manager, ManagesSoftDeletables):
+    """
+    Custom manager for the Password model.
+    """
+
+    use_for_related_fields = True
+
+    def create(self, protected: "IsPasswordProtected", raw_password: str, **kwargs):
+        """
+        Create and save a password with a given protected model instance and a hashable raw password.
+        """
+        assert not is_hashed(raw_password), "Raw password must not be already hashed"
+        validate_password(raw_password)
+        hash = make_password(raw_password)
+        instance = self.model(
+            protected=protected,
+            hash=hash,
+            **kwargs,
+        )
+        instance.save(using=self._db)
+        return instance
+
+    def get_by_natural_key(self, password):
+        return self.get(**{password: password})
 
 
 class EmailAddressManager(Manager):
@@ -56,24 +93,17 @@ class EmailAddressManager(Manager):
 
     use_for_related_fields = True
 
-    def create(self, user, email, is_primary=False, is_verified=False):
+    def create(self, emailable, email, is_primary=False, is_verified=False):
         """
         Create and save an EmailAddress with the given email and user.
         """
         email_address = self.model(
-            user=user,
-            email=self.normalize_email(email),
+            emailable=emailable,
+            email=normalize_email(email),
             is_primary=is_primary,
             is_verified=is_verified,
         )
         email_address.save(using=self._db)
-
-    @staticmethod
-    def normalize_email(email):
-        """
-        Normalize the email address by lowercasing the domain part of the email
-        """
-        return email.lower().strip()
 
     def primary(self):
         """
