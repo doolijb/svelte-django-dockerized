@@ -1,3 +1,4 @@
 black>=22,<23
+drf-yasg>=1.21,<1.22
 factory-boy>=3.2,<3.3
 isort>=5.11,<5.12

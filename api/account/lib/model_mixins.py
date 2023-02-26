@@ -2,7 +2,10 @@ from abc import abstractmethod
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 from core.lib.types import ModelType
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from account.models import User
 
 """
 Here we are using generic types to make it easier to type hint without causing circular imports.
@@ -17,6 +20,9 @@ class IsRedeemable(models.Model):
 
     redeemable_keys = GenericRelation("account.RedeemableKey", related_query_name="redeemable")
 
+    class Meta:
+        abstract: bool = True
+
     @abstractmethod
     def get_is_redeemed(self) -> bool:
         """
@@ -25,33 +31,19 @@ class IsRedeemable(models.Model):
         raise NotImplementedError
 
     @abstractmethod
-    def redeem(self, redeemer: Optional["IsRedeemer"] = None, *args, **kwargs) -> bool:
+    def is_valid_redemption(self, user: Optional["User"] = None, *args, **kwargs) -> bool:
+        """
+        Validate that redemption is possible with the given parameters.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def redeem(self, user: Optional["User"] = None, *args, **kwargs) -> bool:
         """
         Redeem the model instance.
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def redeem_by_redeemer(self, redeemer:"IsRedeemer", *args, **kwargs) -> bool:
-        """
-        Redeem the model instance for a redeemer.
-        """
-        raise NotImplementedError
-
-    class Meta:
-        abstract: bool = True
-
-
-class IsRedeemer(models.Model):
-    """
-    Mixin that adds support for RedeemableKey to a model.
-    Adds the GenericRedeemer type to the model.
-    """
-
-    redeemable_keys = GenericRelation("account.RedeemableKey", related_query_name="redeemer")
-
-    class Meta:
-        abstract: bool = True
 
 class IsPasswordProtected(models.Model):
     """
@@ -59,9 +51,26 @@ class IsPasswordProtected(models.Model):
     Adds the IsPasswordProtected type to the model.
     """
 
+    def get_password(self) -> str:
+        """
+        Returns the password for the protected.
+        """
+        password = self.passwords.first()
+        if password:
+            return password.hash
+        return ""
+
+    def set_password(self, raw_password: str, validate=True) -> None:
+            """
+            Sets the password for the protected.
+            """
+            self.passwords.create(hashable=raw_password, validate=validate)
+
     passwords = GenericRelation("account.Password", related_query_name="password")
+    password = property(fset=set_password, fget=get_password)
 
     class Meta:
+        abstract: bool = True
         # Index the active passwords for this mixin's model
         indexes: list[models.Index] = [
             models.Index(fields=["passwords__is_active"]),
@@ -75,14 +84,15 @@ class IsPasswordProtected(models.Model):
         if password:
             password.delete()
 
-    def set_password(self, raw_password: str) -> None:
+    def check_password(self, raw_password: str) -> bool:
         """
-        Sets the password for the protected.
+        Returns a boolean of whether the raw_password was correct. Handles
+        hashing formats behind the scenes.
         """
-        self.passwords.create(hashable=raw_password)
-
-    class Meta:
-        abstract: bool = True
+        password = self.passwords.first()
+        if password:
+            return password.validate(raw_password)
+        return False
 
 
 class IsEmailable(models.Model):
@@ -94,3 +104,9 @@ class IsEmailable(models.Model):
 
     class Meta:
         abstract: bool = True
+
+    def set_primary_email(self, email: str) -> None:
+        """
+        Sets the primary email address for the emailable.
+        """
+        self.email_addresses.filter(email=email).update(is_primary=True)

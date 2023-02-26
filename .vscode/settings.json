@@ -4,7 +4,14 @@
     },
     "black-formatter.importStrategy": "useBundled",
     "cSpell.words": [
-        "isort"
+        "ASGI",
+        "Browsable",
+        "icontains",
+        "isort",
+        "makemigrations",
+        "redoc",
+        "unitd",
+        "Viewsets"
     ],
     "editor.detectIndentation": false,
     "editor.formatOnSave": true,

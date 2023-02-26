@@ -10,12 +10,13 @@ from django.db import models
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from typing import Literal, cast, Union
+from typing import Literal, Optional, cast
+from django.contrib.auth.hashers import check_password
 
 from core.lib.model_mixins import HasUuidId, HasTimestamps, HasSoftDelete
 
 from .lib.managers import EmailAddressManager, UserManager
-from .lib.model_mixins import IsEmailable, IsRedeemable, IsRedeemer
+from .lib.model_mixins import IsEmailable, IsRedeemable
 
 
 class User(
@@ -23,7 +24,6 @@ class User(
     HasTimestamps,
     PermissionsMixin,
     IsEmailable,
-    IsRedeemer,
     AbstractBaseUser,
     models.Model
 ):
@@ -37,7 +37,7 @@ class User(
     first_name = models.CharField(_("first name"), max_length=30, blank=True)
     last_name = models.CharField(_("last name"), max_length=30, blank=True)
     is_active = models.BooleanField(_("active"), default=True)
-    is_staff = models.BooleanField(_("staff status"), default=False)
+    is_admin = models.BooleanField(_("staff status"), default=False)
     is_superuser = models.BooleanField(_("superuser status"), default=False)
 
     objects: UserManager = UserManager()
@@ -63,6 +63,16 @@ class User(
     def __str__(self) -> str:
         """String representation of the User model."""
         return self.username
+
+    @property
+    def is_staff(self) -> bool:
+        """
+        Return True if the user is a member of staff.
+        This property has been renamed from is_staff to is_admin.
+        This property is to maintain backwards compatibility with Django's
+        default User model.
+        """
+        return self.is_admin
 
     @property
     def full_name(self) -> str:
@@ -105,6 +115,12 @@ class Password(HasUuidId, HasTimestamps, HasSoftDelete, models.Model):
         """String representation of the Password model."""
         return self.hash
 
+    def validate(self, password: str) -> bool:
+        """
+        Check if the given password matches the hash.
+        """
+        return check_password(password, self.hash)
+
 
 class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, models.Model):
     emailable_content_type = models.ForeignKey(
@@ -115,15 +131,19 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, models.Model):
     email = models.EmailField(unique=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     is_primary = models.BooleanField(default=False)
-    redeemable_keys = GenericRelation(
-        "account.RedeemableKey", related_query_name="redeemable"
-    )
+    # redeemable_keys = GenericRelation(
+    #     "account.RedeemableKey", related_query_name="redeemable"
+    # )
 
     objects: EmailAddressManager = EmailAddressManager()
 
     @property
     def is_verified(self) -> bool:
         return bool(self.verified_at)
+
+    @property
+    def emailable_model(self):
+        return self.emailable_content_type.model_class()
 
     class Meta:
         unique_together: tuple[Literal["user"], Literal["email"]]
@@ -138,12 +158,18 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, models.Model):
         If settings.ENABLE_USERNAMES is False, the username will be set to the
         email address.
         """
-        if self.is_primary:
-            EmailAddress.objects.filter(user=self.user).update(is_primary=False)
-            if not settings.ENABLE_USERNAMES and self.user.username != self.email:
-                self.user.username = self.email
-                self.user.save(*args, **kwargs)
-        super().save(*args, **kwargs)
+        with atomic():
+            if self.is_primary:
+                queryset = EmailAddress.objects.filter(
+                        emailable=self.emailable,
+                        is_primary=True
+                    )
+                if self.id:
+                    queryset = queryset.exclude(id=self.id)
+                queryset.update(is_primary=False)
+                if self.emailable_model is User and not settings.ENABLE_USERNAMES:
+                    User.objects.filter(id=self.emailable_id).update(username=self.email)
+            super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         """
@@ -157,40 +183,49 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, models.Model):
             raise ValueError(_("Cannot delete only email address."))
         super().delete(*args, **kwargs)
 
-    def redeem_by_redeemer(
-        self, redeemer: Union["IsRedeemable", "IsEmailable"], *args, **kwargs
-    ) -> bool:
-        assert isinstance(
-            redeemer, IsEmailable
-        ), "Redeemer must be an IsEmailable instance."
-        match redeemer.__class__:
-            case User.__class__:
-                self.confirmed_at = timezone.now()
-                self.save()
-                return True
+    def is_valid_redemption(self, user: Optional["User"] = None, *args, **kwargs) -> bool:
+        """
+        Returns True if the redemption is valid.
+        """
+        if not user:
+            raise ValueError(_("User is required."))
+        match self.emailable_model:
+            case "User":
+                if self.emailable_id != user.id:
+                    return False
             case _:
-                raise ValueError(_(f"Redeemer type {type(redeemer)} not supported."))
+                raise ValueError(_("Not implemented for emailable."))
+        return True
 
+    def redeem(self, user: Optional["User"] = None, *args, **kwargs) -> None:
+        """
+        Redeems the email address.
+        """
+        self.verified_at = timezone.now()
+        self.save()
+
+    def set_primary(self) -> None:
+        """
+        Sets the email address as the primary email address.
+        """
+        self.objects.filter(emailable=self.emailable).update(is_primary=False)
 
 class RedeemableKey(HasUuidId, HasTimestamps, models.Model):
     """
     Provides a generic way to redeem a redeemable object where a redeemer may or
     may not be required.
     """
+    app_label = 'auth'
 
-    redeemer_content_type = models.ForeignKey(
-        ContentType, null=True, on_delete=models.CASCADE, related_name="redeemer_keys"
-    )
-    redeemer_uuid = models.UUIDField(null=True)
-    redeemer = GenericForeignKey("redeemer_content_type", "redeemer_uuid")
+    user = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
     redeemable_content_type = models.ForeignKey(
-        ContentType, on_delete=models.CASCADE, related_name="redeemable_keys"
+        ContentType, null=True, on_delete=models.SET_NULL, related_name="redeemable_keys"
     )
-    redeemable_uuid = models.UUIDField()
     redeemable = GenericForeignKey("redeemable_content_type", "redeemable_uuid")
     expires_at = models.DateTimeField(null=True, blank=True)
     redeemed_at = models.DateTimeField(null=True, blank=True)
 
+    staged_data = {}
     objects = models.Manager()
 
     class Meta:
@@ -204,44 +239,47 @@ class RedeemableKey(HasUuidId, HasTimestamps, models.Model):
         super().save(*args, **kwargs)
 
     @property
+    def redeemable_model(self):
+        return self.redeemable_content_type.model_class()
+
+    @property
+    def is_redeemed(self) -> bool:
+        return bool(self.redeemed_at)
+
+    @property
     def is_expired(self) -> bool:
         """Returns whether the key has expired or not."""
         return self.date_expires < timezone.now()
+
+    @property
+    def can_redeem(self) -> bool:
+        return not self.is_expired and not self.is_redeemed
 
     def expire(self) -> None:
         """Expires the key."""
         self.date_expires: timezone.datetime = timezone.now()
         self.save()
 
-    def redeem(self, *args, **kwargs) -> bool:
-        if self.redeemed_at:
-            raise ValueError(_("Key has already been redeemed."))
-        if self.is_expired:
-            raise ValueError(_("Key has expired."))
-        with atomic():
-            success: bool = cast(IsRedeemable, self.redeemable).redeem(
-                key=self, redeemer=self.redeemer, *args, **kwargs
-            )
-            if success:
-                self.redeemed_at = timezone.now()
-                return True
-        return False
+    def stage_redemption(self, user: Optional["IsRedeemable"] = None, *args, **kwargs) -> None:
+        self.staged_data['user'] = user
+        self.staged_data['args'] = args
+        self.staged_data['kwargs'] = kwargs
 
-    def redeem_by_redeemer(
-        self, key: "RedeemableKey", redeemer: "IsRedeemer", *args, **kwargs
-    ) -> bool:
-        if self.redeemed_at:
-            raise ValueError(_("Key has already been redeemed."))
+    def is_valid(self) -> bool:
         if self.is_expired:
             raise ValueError(_("Key has expired."))
-        if self.redeemer and self.redeemer == redeemer:
-            raise ValueError(_("Redeemer does not own the key."))
+        if self.redeemed_at:
+            raise ValueError(_("Key has already been redeemed."))
+        if self.user and self.staged_data.get('user') != self.user:
+            raise ValueError(_("Key is not valid for this user."))
+        return cast(IsRedeemable, self.redeemable).is_valid_redemption(**self.staged_data)
+
+    def redeem(self, validate=True) -> bool:
+        if validate:
+            self.is_valid()
         with atomic():
-            success: bool = cast(IsRedeemable, self.redeemable).redeem_by_redeemer(
-                key=self, redeemer=redeemer, *args, **kwargs
-            )
+            success: bool = cast(IsRedeemable, self.redeemable).redeem(**self.staged_data)
             if success:
                 self.redeemed_at = timezone.now()
-                self.save()
                 return True
         return False

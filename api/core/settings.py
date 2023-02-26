@@ -12,6 +12,7 @@ INSTALLED_APPS: list[str] = [
     "account",
     # Dependencies
     "rest_framework",
+    'drf_yasg',
     "corsheaders",
     "cachalot",
     "coreapi",
@@ -27,6 +28,8 @@ MIDDLEWARE: list[str] = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 
 ROOT_URLCONF = "core.urls"
@@ -53,7 +56,7 @@ WSGI_APPLICATION = "core.wsgi.application"
 # API / REST / JWT
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "DEFAULT_RENDERER_CLASSES": (
@@ -127,4 +130,15 @@ LOGGING = {
             "propagate": False,
         },
     },
+}
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+                'type': 'basic'
+        },
+    },
+    'USE_SESSION_AUTH': True,
+    'LOGIN_URL': 'api/account/sessions/login',
+    'LOGOUT_URL': 'api/account/sessions/logout',
 }

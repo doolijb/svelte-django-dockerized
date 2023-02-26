@@ -3,8 +3,7 @@ from django.db import transaction
 from django.db.models import Manager
 from core.lib.manager_mixins import ManagesSoftDeletables
 from typing import Optional, TYPE_CHECKING
-from account.lib.utils import is_hashed
-from django.contrib.auth.password_validation import validate_password
+from account.lib.utils import is_hashed, validate_password
 from django.contrib.auth.hashers import make_password
 from account.lib.model_mixins import IsPasswordProtected
 from account.lib.utils import normalize_email
@@ -63,12 +62,13 @@ class PasswordManager(Manager, ManagesSoftDeletables):
 
     use_for_related_fields = True
 
-    def create(self, protected: "IsPasswordProtected", raw_password: str, **kwargs):
+    def create(self, protected: "IsPasswordProtected", raw_password: str, validate=True, **kwargs):
         """
         Create and save a password with a given protected model instance and a hashable raw password.
         """
-        assert not is_hashed(raw_password), "Raw password must not be already hashed"
-        validate_password(raw_password)
+
+        if validate:
+            validate_password(raw_password)
         hash = make_password(raw_password)
         instance = self.model(
             protected=protected,
