@@ -1,10 +1,12 @@
-from django.test import TestCase
+from django.urls import reverse
 from account.lib.factories import UserFactory
-from rest_framework.test import APIRequestFactory
-from ..urls import urlpatterns
+from django.test.client import Client as BaseClient
+from rest_framework.response import Response
+from typing import cast
+from rest_framework.test import APITestCase as BaseAPITestCase, APIRequestFactory
 
 
-class BaseApiTestCase(TestCase):
+class ApiTestCase(BaseAPITestCase):
     """
     Base class for API test cases.
 
@@ -31,6 +33,7 @@ class BaseApiTestCase(TestCase):
     user_args = {  # The arguments to pass to the user factory
         'email_addresses': [{'is_primary': True, 'is_verified': True}],
         'password': user_password,
+        'username': 'testuser', 'first_name': 'Test', 'last_name': 'User',
     }
 
     def __init__(self, *args, **kwargs):
@@ -41,26 +44,7 @@ class BaseApiTestCase(TestCase):
 
         # Setup the request factory
         self.factory = APIRequestFactory()
-
-        self.url_pattern = self.get_url_pattern(self.url_name)
-        self.url = self.get_url(self.url_pattern)
-        self.view = self.get_view(self.url_pattern)
-
-    def get_url_pattern(self, url_name):
-        """
-        Gets the url pattern for a url name.
-        """
-        for url_pattern in urlpatterns:
-            if url_pattern.name == url_name:  # type: ignore
-                return url_pattern
-
-        raise Exception(f"Url pattern '{url_name}' not found.")
-
-    def get_url(self, url_pattern):
-        """
-        Gets the url for a url name.
-        """
-        return url_pattern.pattern.regex.pattern
+        self.url = reverse(self.url_name)
 
     def get_view(self, url_pattern):
         """
@@ -72,27 +56,30 @@ class BaseApiTestCase(TestCase):
         """
         Sets up the test case.
         """
-        self.user = UserFactory.create(**self.user_args)
+        # self.user = UserFactory.create(**self.user_args)
 
-    def login(self, username=None, password=None):
-        """
-        Logs in the user in, returning a token pair.
-        """
+    def tearDown(self) -> None:
+        return super().tearDown()
 
-        url_pattern = self.get_url_pattern('account:tokens')
-        url = self.get_url(url_pattern)
-        view = self.get_view(url_pattern)
+    # def login(self, username=None, password=None):
+    #     """
+    #     Logs in the user in, returning a token pair.
+    #     """
 
-        # Make request
-        request = self.factory.post(
-            url,
-            data={
-                'username': username or self.user.username,
-                'password': password or self.user_password,
-            },
-        )
+    #     url_pattern = self.get_url_pattern('api:account:login-list')
+    #     url = self.get_url(url_pattern)
+    #     view = self.get_view(url_pattern)
 
-        # Send post request
-        response = view(request)
+    #     # Make request
+    #     request = self.factory.post(
+    #         url,
+    #         data={
+    #             'username': username or self.user.username,
+    #             'password': password or self.user_password,
+    #         },
+    #     )
 
-        return response
+    #     # Send post request
+    #     response = view(request)
+
+    #     return response

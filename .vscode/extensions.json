@@ -8,6 +8,7 @@
         "ms-python.isort",
         "haugerbr.project-tasks",
         "redhat.vscode-yaml",
-        "streetsidesoftware.code-spell-checker"
+        "streetsidesoftware.code-spell-checker",
+        "charliermarsh.ruff"
     ]
 }

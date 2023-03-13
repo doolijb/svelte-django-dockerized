@@ -36,10 +36,9 @@ class SessionViewSet(GenericViewSet):
 
 class RegisterViewSet(GenericViewSet):
     serializer_class = RegisterSerializer
-    permission_classes = [IsUnauthenticated]
+    permission_classes = [AllowAny]
 
-    @action(detail=False, methods=['post'])
-    def register(self, request):
+    def create(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

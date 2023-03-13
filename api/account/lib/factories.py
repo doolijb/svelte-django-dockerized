@@ -51,7 +51,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
         # Create the email addresses
         for email_address in email_addresses:
-            email_address['user'] = user
+            email_address['emailable'] = user
             email_address.setdefault('email', factory.Faker('email'))
             email_address.setdefault('is_primary', (not has_primary))
             has_primary: bool = (

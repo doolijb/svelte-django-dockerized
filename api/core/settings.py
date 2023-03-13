@@ -6,13 +6,14 @@ INSTALLED_APPS: list[str] = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # Local Apps
     "account",
     # Dependencies
     "rest_framework",
-    'drf_yasg',
+    "drf_yasg",
     "corsheaders",
     "cachalot",
     "coreapi",
@@ -133,12 +134,10 @@ LOGGING = {
 }
 
 SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'Basic': {
-                'type': 'basic'
-        },
+    "SECURITY_DEFINITIONS": {
+        "Basic": {"type": "basic"},
     },
-    'USE_SESSION_AUTH': True,
-    'LOGIN_URL': 'api/account/sessions/login',
-    'LOGOUT_URL': 'api/account/sessions/logout',
+    "USE_SESSION_AUTH": True,
+    "LOGIN_URL": "api/account/sessions/login",
+    "LOGOUT_URL": "api/account/sessions/logout",
 }

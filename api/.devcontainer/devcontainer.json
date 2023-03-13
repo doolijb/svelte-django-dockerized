@@ -17,6 +17,7 @@
         "donjayamanne.python-extension-pack",
         "ms-python.isort",
         "ms-python.vscode-pylance"
+        "charliermarsh.ruff"
     ],
     "name": "server",
     "overrideCommand": true,

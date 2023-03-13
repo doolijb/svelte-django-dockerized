@@ -7,7 +7,7 @@ from account.views.admin import (
     RedeemableKeyViewSet,
 )
 
-app_name = "account admin"
+app_name = "account:admin"
 
 router = routers.DefaultRouter()
 

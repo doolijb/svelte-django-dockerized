@@ -5,9 +5,6 @@
         "editor.insertSpaces": true,
         "editor.tabSize": 4
     },
-    "black-formatter.interpreter": [
-        "/srv/www/api/venv/bin/python"
-    ],
     "editor.detectIndentation": false,
     "editor.formatOnSave": true,
     "editor.insertSpaces": true,
@@ -25,7 +22,7 @@
     "python.formatting.blackPath": "black",
     "python.formatting.provider": "black",
     "python.globalModuleInstallation": false,
-    "python.languageServer": "Pylance",
+    "python.languageServer": "Pylane",
     "python.linting.enabled": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
     "remote.autoForwardPorts": false,

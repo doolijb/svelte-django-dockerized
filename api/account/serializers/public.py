@@ -46,6 +46,7 @@ class SessionSerializer(serializers.Serializer):
 
 
 class RegisterSerializer(serializers.Serializer):
+    takes_context = True
 
     email = serializers.EmailField(write_only=True)
     username = serializers.CharField(write_only=True)
@@ -60,30 +61,31 @@ class RegisterSerializer(serializers.Serializer):
             self.fields.pop("username")
 
     def validate_password(self, value):
-        if not validate_password(value):
-            raise serializers.ValidationError(_("Invalid password."))
+        validate_password(value)
+        return value
+
+    def validate_password_confirm(self, value):
+        if value != self.context["request"].data["password"]:
+            raise serializers.ValidationError(_("Passwords do not match."))
         return value
 
     def validate(self, data):
-        if data["password"] != data["password_confirm"]:
-            raise serializers.ValidationError(_("Passwords do not match."))
-        data.delete("password_confirm")
         return super().validate(data)
 
     def create(self, validated_data):
-        login(self.context["request"], self.instance)
-        user = User.objects.create_user(
+        self.instance = User.objects.create_user(
             email=validated_data["email"],
-            password=validated_data["password"],
+            raw_password=validated_data["password"],
             first_name=validated_data["first_name"],
             last_name=validated_data["last_name"],
         )
-        return user
+        login(self.context["request"], self.instance)
+        return self.instance
 
     def to_representation(self, instance):
         return {
             "message": _("Registered successfully."),
-            **UserSerializer(instance).data
+            "user": UserSerializer(instance, context=self.context).data
         }
 
 
@@ -121,8 +123,7 @@ class SetPasswordSerializer(serializers.Serializer):
     password_confirm = serializers.CharField(write_only=True)
 
     def validate_password(self, value):
-        if not validate_password(value):
-            raise serializers.ValidationError(_("Invalid password."))
+        validate_password(value)
         return value
 
     def validate(self, data):

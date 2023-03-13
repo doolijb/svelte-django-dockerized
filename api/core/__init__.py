@@ -46,7 +46,7 @@ CACHALOT_TIMEOUT: int = int(
     os.environ.get("DJANGO_CACHALOT_TIMEOUT", default=CACHE_DEFAULT_TIMEOUT)
 )
 
-LOG_LEVEL: str = os.environ.get("DJANGO_LOG_LEVEL")
+LOG_LEVEL: str = os.environ.get("DJANGO_LOG_LEVEL", "INFO")
 
 SQL_HOST: str = os.environ.get("DJANGO_SQL_HOST")
 

@@ -24,5 +24,6 @@
     },
     "git.ignoreLimitWarning": true,
     "prettier.tabWidth": 4,
+    "python.formatting.provider": "black",
     "vetur.format.options.tabSize": 4
 }

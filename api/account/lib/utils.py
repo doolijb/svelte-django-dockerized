@@ -1,4 +1,6 @@
 from django.contrib.auth.password_validation import validate_password as base_validate_password
+from django.forms import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 def is_hashed(string: str) -> bool:
@@ -34,5 +36,6 @@ def validate_password(raw_password: str) -> None:
             Validates a password and raises a ValidationError if it's invalid.
         """
         # TODO: Add validators
-        assert not is_hashed(raw_password), "Raw password must not be already hashed"
+        if is_hashed(raw_password):
+            raise ValidationError(_("Password is encrypted."))
         return base_validate_password(raw_password)

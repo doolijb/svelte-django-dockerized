@@ -21,18 +21,9 @@ schema_view = get_schema_view(
    permission_classes=[permissions.AllowAny],
 )
 
-api_urlpatterns = [
-    # path("admin/", admin.site.urls),
-    path("account/", include("account.urls.public"), name="account"),
-]
-
-admin_api_urlpatterns = [
-    path("account/", include("account.urls.admin"), name="account"),
-]
-
 urlpatterns = [
-    path("api/", include(api_urlpatterns), name="api"),
-    path("api/admin/", include(admin_api_urlpatterns), name="api-admin")
+    path("api/account/", include("account.urls.public")),
+    path("api/admin/account/", include("account.urls.admin"))
 ]
 
 if settings.DEBUG:
