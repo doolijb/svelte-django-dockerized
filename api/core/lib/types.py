@@ -3,18 +3,18 @@ These types are used to improve type hinting without causing circular imports
 and class inheritance conflicts with mixins.
 """
 
-from typing import TYPE_CHECKING, TypedDict, Callable
+# from typing import TYPE_CHECKING, TypedDict, Callable
 
-ManagerType = object
-ModelType = object
-ViewSetType = object
+# ManagerType = object
+# ModelType = object
+# ViewSetType = object
 
-if TYPE_CHECKING:
-    from django.db.models import Manager, Model, CASCADE, PROTECT, SET_NULL, SET_DEFAULT, SET
-    from rest_framework.viewsets import ViewSet
-    ManagerType = type("Manager")
-    ModelType = type("Model")
-    ViewSetType = type("ViewSet")
+# if TYPE_CHECKING:
+#     from django.db.models import Manager, Model, CASCADE, PROTECT, SET_NULL, SET_DEFAULT, SET
+#     from rest_framework.viewsets import ViewSet
+#     ManagerType = type("Manager")
+#     ModelType = type("Model")
+#     ViewSetType = type("ViewSet")
 
 
 # class ManyToOneForeignKeyDict(TypedDict):

@@ -2,12 +2,11 @@ from abc import abstractmethod
 from inspect import Attribute
 from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
-from core.lib.types import ModelType
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from account.models import User, Password, EmailAddress
-    from account.lib.managers import PasswordManager
+    from account.lib.managers import PasswordManager, EmailAddressManager, RedeemableKeyManager
 
 """
 Here we are using generic types to make it easier to type hint without causing circular imports.
@@ -19,13 +18,10 @@ class IsRedeemable(models.Model):
     Adds the GenericRedeemable type to the model.
     """
 
-    class meta:
+    class Meta:
         abstract = True
 
-    redeemable_keys = GenericRelation(
-        "account.RedeemableKey",
-        related_query_name="redeemable"
-        )
+    redeemable_keys: "RedeemableKeyManager"
 
     @abstractmethod
     def get_is_redeemed(self) -> bool:
@@ -55,27 +51,21 @@ class IsPasswordProtected(models.Model):
     Adds the IsPasswordProtected type to the model.
     """
 
-    class meta:
+    class Meta:
         abstract = True
 
-    # Add this model to a global list of models that support passwords
-    # This is used to dynamicall add foreign keys to the Password model
-    # This is a list of strings to avoid circular imports
-    if not 'models_with_passwords' in globals():
-        globals()['models_with_passwords'] = {}
-    globals()['models_with_passwords'][__name__] = f"__app_label__.{__name__}"
-
-    # passwords: ForeignKeyManager["Password"]
     _password: Optional["Password"] = None
+    passwords: "PasswordManager"
 
     def get_password(self) -> Optional["Password"]:
         """
         Returns the most recent password for the user.
         """
+        from account.models import Password
         if self._password:
             return self._password
-        _set_password = self.passwords.by_newest().first()
-        return _set_password
+        self._password = Password.objects.filter(protected=self, deleted_at__isnull=True).first()
+        return self._password
 
 
     def set_password(self, value: str) -> None:
@@ -91,16 +81,25 @@ class IsPasswordProtected(models.Model):
         # Create a new password
         self._password = Password.objects.create(protected=self, raw_password=value)
 
+    def delete_password(self) -> None:
+        """
+        Deletes the user's password.
+        """
+        # Delete any existing passwords for this user
+        Password.objects.filter(deleted_at__isnull=True, protected=self).delete()
+        _password = None
+
     def set_unusable_password(self) -> None:
         """
         Sets a value that will never be a valid hash.
         """
-        password = self.passwords.by_newest().first()
-        if password:
-            password.delete()
-        _password = None
+        self.delete_password()
 
-    password = property(get_password, set_password, set_unusable_password)
+    def refresh_from_db(self, using=None, fields=None, **kwargs):
+        _password = None
+        super().refresh_from_db(using, fields, **kwargs)
+
+    password = property(get_password, set_password, delete_password)
 
     class Meta:
         # Index the active passwords for this mixin's model
@@ -119,11 +118,16 @@ class IsPasswordProtected(models.Model):
         return False
 
 
-class IsEmailable(ModelType):
+class IsEmailable(models.Model):
     """
     Mixin that adds support for EmailAddress to a model.
     """
+
+    class Meta:
+        abstract = True
+
     _primary_email_address: Optional["EmailAddress"] = None
+    email_addresses: "EmailAddressManager"
 
     def get_primary_email_address(self) -> Optional["EmailAddress"]:
         """
@@ -131,7 +135,7 @@ class IsEmailable(ModelType):
         """
         if self._primary_email_address:
             return self._primary_email_address
-        _primary_email_address = self.email_addresses.by_primary().first()
+        _primary_email_address = self.email_addresses.primary()
         return _primary_email_address
 
     def set_primary_email_address(self, value) -> None:
@@ -147,6 +151,6 @@ class IsEmailable(ModelType):
         else:
             raise TypeError("Invalid value for primary email address, must be a string, int, or EmailAddress instance.")
         self.email_addresses.filter(**kwargs).update(is_primary=True)
-        self._primary_email_address = self.email_addresses.by_primary().first()
+        self._primary_email_address = self.email_addresses.primary()
 
     primary_email_address = property(get_primary_email_address, set_primary_email_address)

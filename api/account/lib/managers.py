@@ -1,6 +1,7 @@
+import logging
 from django.contrib.auth.base_user import BaseUserManager
 from django.db import transaction
-from django.db.models import Manager
+from django.db.models import Manager, Model
 from core.lib.manager_mixins import ManagesPolymorphicRelationships, ManagesSoftDeletables, ManagesTimestamps
 from typing import Optional, TYPE_CHECKING
 from account.lib.utils import validate_password, normalize_email
@@ -10,8 +11,6 @@ from django.utils import timezone
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
 
-
-
 if TYPE_CHECKING:
     from account.models import User
 
@@ -20,30 +19,31 @@ class UserManager(ManagesSoftDeletables, ManagesTimestamps, BaseUserManager):
     Custom user model manager where email is the unique identifiers
     """
 
-    def create_user(self, username:Optional[str]=None, email:Optional[str]=None, is_verified=False, raw_password:Optional[str]=None, **extra_fields):
+    def create_user(self, email:str, username:Optional[str]=None, is_verified=False, raw_password:Optional[str]=None, **extra_fields):
         """
         Create and save a User with the given email and password.
         """
 
-        with transaction.atomic():
-            email = normalize_email(email)
-            username = username or email if settings.ENABLE_USERNAMES else email
-            user = super().create(username=username, **extra_fields)
-            if raw_password:
-                from account.models import Password
-                user.set_password(raw_password)
+        email = normalize_email(email)
+        if settings.ENABLE_USERNAMES:
+            username = username or email
+        elif username:
+            logging.warning("Username was provided but ENABLE_USERNAMES is False. Ignoring username.")
+        user = super().create(username=username, **extra_fields)
+        if email:
+            from account.models import EmailAddress
+            EmailAddress.objects.create(
+                email=normalize_email(email),
+                is_verified=is_verified,
+                emailable=user,
+            )
 
-            user.save(using=self._db)
-            if email:
-                # TODO: Fix this, we should be able to use the EmailAddressManager in a reverse relationship
-                # user.email_addresses.create(email=email, is_verified=is_verified)
-                # Directly create the email address as a temporary workaround...
-                from account.models import EmailAddress
-                EmailAddress.objects.create(
-                    email=normalize_email(email),
-                    is_verified=is_verified,
-                    emailable=user,
-                )
+        if raw_password:
+            from account.models import Password
+            Password.objects.create(
+                protected=user,
+                raw_password=raw_password,
+            )
         return user
 
     create = create_user
@@ -74,21 +74,15 @@ class PasswordManager(ManagesSoftDeletables, ManagesTimestamps, ManagesPolymorph
 
     use_for_related_fields = True
 
-    def create(self, protected: "IsPasswordProtected", raw_password: str, validate=True, **kwargs):
+    def create(self, protected:IsPasswordProtected, raw_password: str, validate=True, **kwargs):
         """
         Create and save a password with a given protected model instance and a hashable raw password.
         """
-
         if validate:
             validate_password(raw_password)
-        hash = make_password(raw_password)
-        instance = self.model(
-            protected=protected,
-            hash=hash,
-            **kwargs,
-        )
-        instance.save(using=self._db)
-        return instance
+        kwargs['hash'] = make_password(raw_password)
+        password = super().create(protected=protected, **kwargs)
+        return password
 
     def get_by_natural_key(self, password):
         return self.get(**{password: password})
@@ -131,10 +125,10 @@ class EmailAddressManager(ManagesTimestamps, ManagesPolymorphicRelationships, Ma
         if 'is_primary' in kwargs.keys():
             raise ValueError("Cannot set is_primary directly, field is set automatically on creation.")
 
-        super().create(
+        return super().create(
             emailable=emailable,
             email=normalize_email(email),
-            is_primary=emailable.email_addresses.filter(is_primary=True).first() is None,
+            is_primary=self.get_queryset().filter(emailable=emailable, is_primary=True).first() is None,
             verified_at=verified_at,
         )
 
@@ -152,18 +146,6 @@ class RedeemableKeyManager(ManagesTimestamps, ManagesPolymorphicRelationships, M
     """
     Custom manager for the RedeemableKey model.
     """
-
-    def create(self, user, redeemable, date_expires=None):
-        """
-        Create and save a RedeemableKey with the given user and redeemable.
-        """
-        redeemable_key = self.model(
-            user=user,
-            redeemable=redeemable,
-            date_expires=date_expires,
-        )
-        redeemable_key.save(using=self._db)
-        return
 
     def redeem(self, uuid, user, commit=True):
         """
@@ -200,9 +182,3 @@ class RedeemableKeyManager(ManagesTimestamps, ManagesPolymorphicRelationships, M
         Return a queryset of redeemed redeemable keys.
         """
         return super().filter(redeemed_at__isnull=False)
-
-    def email_addresses(self):
-        """
-        Return a queryset of redeemable keys for email addresses.
-        """
-        return self.filter(redeemable_type__model='emailaddress')

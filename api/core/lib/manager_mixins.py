@@ -1,9 +1,10 @@
-from typing import cast
+from typing import Type, cast
 from django.db import models
 from abc import abstractmethod
 from django.db.models import Manager
 from core.lib.model_fields import PolymorphicFKRelationship
 from core.lib.model_mixins import HasPolymorphicForeignKeys
+from core.lib.querysets import PolycapableQueryset, map_polymorphic_field_kwargs
 
 class ManagesSoftDeletables(Manager):
 
@@ -40,19 +41,14 @@ class ManagesPolymorphicRelationships(Manager):
     class Meta:
         abstract = True
 
+    model: Type[HasPolymorphicForeignKeys]
+
     def _map_polymorphic_field_kwargs(self, **kwargs):
-        relationships = self.model.get_polymorphic_relationships()
-        for rel_field, rel_prop in relationships.items():
-            print(f"rel_field_name: {rel_field}")
-            if not rel_field:
-                raise ValueError(f"Could not find relationship field name for relationship {rel_prop} in model {self.model}")
-            if rel_field in kwargs:
-                model_field_name = self.model.get_relationship_model_field_name(rel_prop, self.model)
-                print(f"model_field_name: {model_field_name}")
-                if not model_field_name:
-                    raise ValueError(f"Could not foreign key field name for relationship {rel_field} and model {self.model}")
-                kwargs[model_field_name] = kwargs.pop(rel_field)
-        return kwargs
+        return map_polymorphic_field_kwargs(self, **kwargs)
+
+    def get_queryset(self) -> models.QuerySet:
+        """ Uses PolycapableQueryset"""
+        return PolycapableQueryset(self.model, using=self._db)
 
     def get(self, *args, **kwargs):
         """
@@ -80,4 +76,15 @@ class ManagesPolymorphicRelationships(Manager):
         Create a new model instance.
         """
         kwargs = self._map_polymorphic_field_kwargs(**kwargs)
-        return super().create(*args, **kwargs)
+        try:
+            instance = super().create(*args, **kwargs)
+        except Exception as e:
+            raise e
+        return instance
+
+    def get_or_create(self, *args, **kwargs):
+        """
+        Get or create a model instance.
+        """
+        kwargs = self._map_polymorphic_field_kwargs(**kwargs)
+        return super().get_or_create(*args, **kwargs)

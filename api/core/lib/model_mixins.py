@@ -4,13 +4,12 @@ from django.apps import apps
 from django.db import models
 from uuid import uuid4
 from django.utils import timezone
-from core.lib.types import ModelType
 from typing import cast
 from core.lib.model_fields import PolymorphicFK, PolymorphicFKRelationship
 from django.core.exceptions import ValidationError
 
 # Mixin that adds a UUID primary key to a model.
-class HasUuidId(ModelType):
+class HasUuidId(models.Model):
     """
     Mixin that adds a UUID primary key to a model.
 
@@ -68,14 +67,6 @@ class HasPolymorphicForeignKeys(models.Model):
     class Meta:
         abstract: bool = True
 
-    def __init__(self, *args, **kwargs) -> None:
-
-        for key in self.get_polymorphic_relationships().keys():
-                new_value = kwargs.pop(key, None)
-                if new_value:
-                    setattr(self, key, new_value)
-        super().__init__(*args, **kwargs)
-
     def _check_polymorphic_relationships(self):
         """
         Check that all PolymorphicRelationships have at most one PolymorphicFK that is populated.
@@ -110,7 +101,6 @@ class HasPolymorphicForeignKeys(models.Model):
             f for f in cls._meta.fields
             if isinstance(f, PolymorphicFK) and f.relationship_field is relationship_field
         ]
-
 
     @classmethod
     def get_relationship_model_field_name(cls, relationship, model):

@@ -2,6 +2,8 @@
 Models for the account app.
 """
 
+from os import truncate
+import textwrap
 from types import NoneType
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -116,14 +118,19 @@ class Password(
         """
         Meta options for the Password model.
         """
-        abstract=False
         verbose_name: str = _("password")
         verbose_name_plural: str = _("passwords")
         # ordering: list[str] = ["-created_at"]
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """String representation of the Password model."""
-        return self.hash
+        protected_str = None
+        deleted_str = None
+        if self.protected:
+            protected_str = f"{self.protected.__class__.__name__}: {self.protected.id}"
+        if self.deleted_at:
+            deleted_str = f", DELETED"
+        return f"<Password: {self.pk}, protected {protected_str}{deleted_str}>"
 
     def validate(self, password: str) -> bool:
         """
@@ -140,6 +147,10 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, HasPolymorphicForeign
     is_primary = models.BooleanField(default=False)
 
     objects: EmailAddressManager = EmailAddressManager()
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._original_is_primary = self.is_primary
 
     @property
     def is_verified(self) -> bool:
@@ -160,7 +171,9 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, HasPolymorphicForeign
         email address.
         """
         with atomic():
-            if self.emailable and self.is_primary:
+            # If has emailable, is set to primary and primary field has changed.
+            if self.emailable and self.is_primary and self.is_primary != self._original_is_primary:
+                # Set all other email addresses to non-primary.
                 queryset = EmailAddress.objects.filter(
                     emailable=self.emailable,
                     verified_at__isnull=False,
@@ -168,7 +181,9 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, HasPolymorphicForeign
                 if self.id:
                     queryset = queryset.exclude(id=self.id)
                 queryset.update(is_primary=False)
-                if self.emailable is User and not settings.ENABLE_USERNAMES:
+
+                # Update the username if the email address is changed.
+                if self.emailable is User and self.emailable.username != self.email and not settings.ENABLE_USERNAMES:
                     User.objects.filter(id=self.emailable.id).update(
                         username=self.email
                     )

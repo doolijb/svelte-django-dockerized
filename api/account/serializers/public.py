@@ -88,10 +88,49 @@ class RegisterSerializer(serializers.Serializer):
             "user": UserSerializer(instance, context=self.context).data
         }
 
+class EmailAddressSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True, write_only=True)
+    is_primary = serializers.BooleanField(required=False, help_text=_("Whether this email address is the primary one. Only one email address can be primary at a time. Ignored on creation."))
+    is_verified = serializers.BooleanField(read_only=True)
+    emailable = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = EmailAddress
+        fields = ("id", "email", "is_primary", "is_verified", "emailable")
+
+    def validate_email(self, value):
+        if self.instance and value and self.instance.email != value:
+            raise serializers.ValidationError(_("Email cannot be changed."))
+        return value
+
+    def validate_is_primary(self, value):
+        if not self.instance:
+            return False
+        return value
+
+    def set_primary(self, *args, **kwargs):
+        if self.instance:
+            self.instance.set_primary()
+        return self.instance
+
+    def validate(self, data):
+        if self.instance:
+            if self.instance.emailable != self.context["request"].user:
+                logging.critical("User {} attempted to set primary email for user {}.".format(
+                    self.context["request"].user.id, self.instance.emailable.id
+                ))
+        return super().validate(data)
+
+    def update(self, instance, validated_data):
+        raise NotImplementedError
+
+    def partial_update(self, instance, validated_data):
+        raise NotImplementedError
+
 
 class UserSerializer(serializers.ModelSerializer):
 
-    email_addresses = serializers.SerializerMethodField()
+    email_addresses = EmailAddressSerializer(many=True)
 
     class Meta:
         model = User
@@ -136,46 +175,6 @@ class SetPasswordSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         return {"message": _("Password updated.")}
-
-
-class EmailAddressSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(required=True, write_only=True)
-    is_primary = serializers.BooleanField(required=False, help_text=_("Whether this email address is the primary one. Only one email address can be primary at a time. Ignored on creation."))
-    is_verified = serializers.BooleanField(read_only=True)
-    emailable = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    class Meta:
-        model = EmailAddress
-        fields = ("id", "email", "is_primary", "is_verified", "emailable")
-
-    def validate_email(self, value):
-        if self.instance and value and self.instance.email != value:
-            raise serializers.ValidationError(_("Email cannot be changed."))
-        return value
-
-    def validate_is_primary(self, value):
-        if not self.instance:
-            return False
-        return value
-
-    def set_primary(self, *args, **kwargs):
-        if self.instance:
-            self.instance.set_primary()
-        return self.instance
-
-    def validate(self, data):
-        if self.instance:
-            if self.instance.emailable != self.context["request"].user:
-                logging.critical("User {} attempted to set primary email for user {}.".format(
-                    self.context["request"].user.id, self.instance.emailable.id
-                ))
-        return super().validate(data)
-
-    def update(self, instance, validated_data):
-        raise NotImplementedError
-
-    def partial_update(self, instance, validated_data):
-        raise NotImplementedError
 
 
 class RedeemKeySerializer(serializers.Serializer):
