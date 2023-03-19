@@ -1,7 +1,12 @@
 from rest_framework.permissions import BasePermission
 from django.utils.translation import gettext as _
-from account.models import EmailAddress, User
-from typing import cast
+from django.db.models import Model
+
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from account.models import User, EmailAddress
+
 
 class IsSelf(BasePermission):
     """
@@ -15,9 +20,9 @@ class IsSelf(BasePermission):
         """
         match type(obj):
             case "User":
-                return cast(User, obj) ==request.user
+                return cast("User", obj) ==request.user
             case "EmailAddress":
-                return cast(EmailAddress, obj).emailable == request.user
+                return cast("EmailAddress", obj).emailable == request.user
             case _:
                 raise TypeError(f"Unexpected type {type(obj)}.")
 

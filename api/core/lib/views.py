@@ -1,6 +1,6 @@
-from .types import ViewSetType
+from rest_framework.viewsets import ViewSetMixin
 
-class HasPermissionsHelperMixin(ViewSetType):
+class HasPermissionsHelperMixin(ViewSetMixin):
     """
     A mixin that overrides `get_serializer_class` method that returns a different
     serializer class depending on whether the user is staff or not.

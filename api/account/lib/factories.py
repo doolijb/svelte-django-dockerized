@@ -4,21 +4,24 @@ import factory
 import factory.django
 from django.apps import apps
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from faker import Faker
-
-from account.lib.managers import EmailAddressManager
 
 ###
 # Models
 ###
 
-User = get_user_model()
-EmailAddress = apps.get_model('account', 'EmailAddress')
+User = None
+EmailAddress = None
+
+if __name__ == '__main__':
+    User = apps.get_model(settings.AUTH_USER_MODEL)
+    EmailAddress = apps.get_model('account', 'EmailAddress')
+
 
 ###
 # Factories
 ###
+
 
 fake = Faker()
 

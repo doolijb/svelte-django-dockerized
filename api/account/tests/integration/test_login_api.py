@@ -5,6 +5,6 @@ from account.models import User
 from typing import cast
 from rest_framework.response import Response
 
-from core.lib.tests import ApiTestCase
+from core.lib import ApiTestCase
 
 logger = getLogger(__name__)

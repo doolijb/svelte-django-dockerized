@@ -1,103 +1,17 @@
-#! bash
+#!/bin/bash
 
-# Make sure excuted with bash and not sh
-if [ -z "$BASH_VERSION" ]; then
-    echo "Please run with bash"
-    exit 1
-fi
+source .scripts/base.sh
 
-# First argument is the command to run
-CMD="$1"
+# Add commands here
+declare -A COMMANDS=(
+    ["help"]="show_help 'Project'",
+    ["docker:build"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/build.sh",
+    ["docker:up"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/up.sh",
+    ["docker:up:server"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/up:server.sh",
+    ["docker:down:dev"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/down:dev.sh",
+    ["api:format:black"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/up:server.sh --silent && EXEC=\"bash /srv/www/api/.scripts/run format:black\" && $DOCKER_COMPOSE exec server $EXEC",
+    ["api:format:isort"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/up:server.sh --silent && EXEC=\"bash /srv/www/api/.scripts/run format:isort\" && $DOCKER_COMPOSE exec server $EXEC",
+    ["client:format:lint"]="source .scripts/docker/get:compose.sh && bash .scripts/docker/up:dev.sh --silent && EXEC=\"bash /app/client/.scripts/run format:lint\" && $DOCKER_COMPOSE exec client $EXEC",
+)
 
-# If no script is provided, exit
-if [ -z CMD ]; then
-    echo "No command name provided"
-    exit 1
-fi
-
-# Set defaults flag values
-DETACH=''
-
-# Check rest of arguments for -d --silent --quiet flags
-shift
-while [ $# -gt 0 ]; do
-    case "$1" in
-        -d | -s | --detach | --silent)
-            DETACH='nohup'
-            ;;
-        *)
-            echo "Unknown flag: $1"
-            exit 1
-            ;;
-    esac
-    shift
-done
-
-###
-# docker
-###
-
-if [ $CMD = "docker:build" ]; then
-    source .scripts/docker/get:compose
-    eval $"$PREFIX bash .scripts/docker/build"
-    exit 0
-fi
-
-if [ $CMD = "docker:up" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/up
-    exit 0
-fi
-
-if [ $CMD = "docker:up:server" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/up:server
-    exit 0
-fi
-
-if [ $CMD = "docker:down:dev" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/down:dev
-    exit 0
-fi
-
-###
-# api
-###
-
-if [ $CMD = "api:format:black" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/up:server --silent
-    EXEC="bash /srv/www/api/.scripts/run format:black"
-    eval $"$PREFIX $DOCKER_COMPOSE exec server $EXEC"
-    exit 0
-fi
-
-if [ $CMD = "api:format:isort" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/up:server --silent
-    EXEC="bash /srv/www/api/.scripts/run format:isort"
-    eval $"$PREFIX $DOCKER_COMPOSE exec server $EXEC"
-    exit 0
-fi
-
-###
-# client
-###
-
-# client:format
-if [ $CMD = "client:format:lint" ]; then
-    source .scripts/docker/get:compose
-    bash .scripts/docker/up:dev --silent
-    EXEC="bash /app/client/.scripts/run format:lint"
-    eval $"$PREFIX $DOCKER_COMPOSE exec client $EXEC"
-    exit 0
-fi
-
-
-###
-# If script is not found, exit
-###
-
-echo "Command not found: $CMD"
-exit 1
+run_command $CMD

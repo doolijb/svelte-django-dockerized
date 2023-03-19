@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from account.views.public import (
+from account.views import (
     SessionViewSet,
     RegisterViewSet,
     UserViewSet,

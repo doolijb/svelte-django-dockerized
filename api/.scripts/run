@@ -1,127 +1,18 @@
-#! bash
+#!/bin/bash
 
-# # # # # # # # # # # # # # # #
-# SAFETY CHECKS               #
-# # # # # # # # # # # # # # # #
+source ../.scripts/base.sh
 
-CMD=$1
+# Add API-specific commands here
+declare -A COMMANDS=(
+    ["help"]="show_help 'api'",
+    ["serve"]="bash .scripts/serve.sh",
+    ["shell"]="bash .scripts/shell.sh",
+    ["test"]="bash .scripts/test.sh",
+    ["migrate"]="bash .scripts/migrate.sh",
+    ["cmd"]="bash .scripts/cmd.sh",
+    ["pip"]="bash .scripts/pip.sh",
+    ["format:black"]="bash .scripts/format_black.sh",
+    ["format:isort"]="bash .scripts/format_isort.sh"
+)
 
-if [ -z "$BASH_VERSION" ]; then
-    echo "Please run with bash"
-    exit 1
-fi
-
-if [ -z CMD ]; then
-    echo "No command name provided"
-    exit 1
-fi
-
-# # # # # # # # # # # # # # # #
-# CD AND GET INTERPETER       #
-# # # # # # # # # # # # # # # #
-
-cd /srv/www/api
-# Activate the venv
-eval ". venv/bin/activate"
-PYTHON = "python3.11"
-
-# # # # # # # # # # # # # # # #
-# PARSE COMMAND               #
-# # # # # # # # # # # # # # # #
-
-# Get lengh of command namespaces, : delimited
-CMD_LEN=$(echo $CMD | awk -F: '{print NF}')
-NAMESPACE=""
-SCRIPT=""
-
-if [ $CMD_LEN -eq 1 ]; then
-    SCRIPT=$CMD
-else
-    NAMESPACE=$(echo $CMD | cut -d: -f1)
-    SCRIPT=$(echo $CMD | cut -d: -f2)
-fi
-
-# # # # # # # # # # # # # # # #
-# PARSE ARGS                  #
-# # # # # # # # # # # # # # # #
-
-PREFIX=""
-SUFFIX=""
-
-shift
-while [ $# -gt 0 ]; do
-    # Silent flags
-    case "$1" in
-        -d | -s | --detach | --silent)
-            PREFIX=$"nohup $PREFIX"
-            ;;
-        *)
-            # Else, add to suffix
-            SUFFIX="$SUFFIX $1"
-            ;;
-    esac
-    shift
-done
-
-# # # # # # # # # # # # # # # #
-# EXTERNAL SCRIPTS            #
-# # # # # # # # # # # # # # # #
-
-if [ ! -z $NAMESPACE ]; then
-    # If script is not found, exit
-    if [ ! -f ".scripts/$NAMESPACE/$SCRIPT" ]; then
-        echo "Command not found: $NAMESPACE/$SCRIPT"
-        exit 1
-    fi
-    eval $"$PREFIX bash .scripts/$NAMESPACE/$SCRIPT"
-    exit 0
-fi
-
-# # # # # # # # # # # # # # # #
-# INTERNAL SCRIPTS            #
-# # # # # # # # # # # # # # # #
-
-if [ $SCRIPT = "help" ]; then
-    bash .scripts/utils/help
-    exit 0
-fi
-
-if [ $SCRIPT = "serve" ]; then
-    bash .scripts/utils/server_is_dev
-    eval "npx kill-port 8080"
-    eval $"$PREFIX $PYTHON manage.py runserver 0.0.0.0:8080"
-    exit 0
-fi
-
-if [ $SCRIPT = "shell" ]; then
-    eval $"$PREFIX $PYTHON manage.py shell $SUFFIX"
-    exit 0
-fi
-
-if [ $SCRIPT = "test" ]; then
-    eval $"$PREFIX $PYTHON manage.py test $SUFFIX"
-    exit 0
-fi
-
-if [ $SCRIPT = "migrate" ]; then
-    eval $"$PREFIX $PYTHON manage.py migrate $SUFFIX"
-    exit 0
-fi
-
-if [ $SCRIPT = "cmd" ]; then
-    eval $"$PREFIX $PYTHON manage.py $SUFFIX"
-    exit 0
-fi
-
-if [ $SCRIPT = "pip" ]; then
-    eval $"$PREFIX pip $SUFFIX"
-    exit 0
-fi
-
-# # # # # # # # # # # # # # # #
-# END OF FILE - CMD NOT FOUND #
-# # # # # # # # # # # # # # # #
-
-# If script is not found, exit
-echo "Command not found: $CMD"
-exit 1
+run_command $CMD

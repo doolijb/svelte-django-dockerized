@@ -1,5 +1,7 @@
-from typing import Any, Optional, cast
-from django.db.models import ForeignKey, CASCADE, PROTECT, SET_NULL, SET_DEFAULT, SET, Model
+from typing import Any, Optional, Type, cast
+from django.db.models import ForeignKey, Model
+from typing import Any
+from .types import OnDeleteType
 
 
 class PolymorphicFKRelationship():
@@ -7,12 +9,12 @@ class PolymorphicFKRelationship():
     Defines a relationship between a group of polymorphic foreign keys
     """
 
-    _populated_field: Optional["PolymorphicFK"] = None
-
-    def __init__(self, null: bool, on_delete: Any, related_name: str):
+    def __init__(self, null: bool, on_delete: OnDeleteType, related_name: str):
         self.null = null
         self.on_delete = on_delete
         self.related_name = related_name
+        self.related_fields = []
+        self._populated_field: Optional["PolymorphicFK"] = None
 
     def __repr__(self) -> str:
         return f"PolymorphicRelationship(null={self.null}, on_delete={self.on_delete}, related_name='{self.related_name}')"
@@ -77,13 +79,7 @@ class PolymorphicFKRelationship():
         self.related_fields.append(fk)
 
     populated_field = property(_get_populated_field, _set_populated_field, _set_populated_field_to_none)
-    populated_type: Optional[Any] = None # TODO: Needs getter, setter
-    related_fields = []
-
-    def get_prep_value(self, value):
-        if isinstance(value, PolymorphicFKRelationship):
-            return value.pk
-        return super().get_prep_value(value)
+    populated_type: Optional[Type[Model]] = None # TODO: Needs getter, setter
 
     def get_field_for_model(self, model: Any):
         """
@@ -108,7 +104,7 @@ class PolymorphicFK(ForeignKey):
     This should not be used directly. Instead, use the PolymorphicFK function. This is because
     child classes inherit parent constructor arguments, which we do not want.
     """
-    relationship_field:PolymorphicFKRelationship
+    relationship_field:Optional[PolymorphicFKRelationship] = None
 
     def __set__(self, instance, value: Optional[Any], propagate_up: bool = True):
         if propagate_up:
@@ -121,24 +117,27 @@ class PolymorphicFK(ForeignKey):
     def __get__(self, instance, owner):
         if instance is None:
             return self
-        pk = getattr(instance, self.attname) if hasattr(instance, self.attname) else None
+        pk = instance.__dict__[self.attname] if self.attname in instance.__dict__ else None
         if pk:
             return self.related_model.objects.get(pk=pk)
         return None
 
 
-def PolymorphicForeignKey(model:Any, relationship_field:PolymorphicFKRelationship):
+def PolymorphicForeignKey(model:Type[Model], relationship_field:PolymorphicFKRelationship):
     """
     A polymorphic foreign key that can be used to create a polymorphic relationship
     between two models. Returns a Django ForeignKey.
     """
-    fk = PolymorphicFK(
-        model,
+
+    kwargs = dict(
+        to=model,
         on_delete=relationship_field.on_delete,
-        null=True, # type: ignore
+        null=True,
         blank=True,
-        related_name=relationship_field.related_name
+        related_name=relationship_field.related_name,
     )
+
+    fk = PolymorphicFK(**kwargs) # type: ignore
     relationship_field._add_related_fk(fk)
-    fk.relationship_field = relationship_field
+    fk.relationship_field = relationship_field # type: ignore
     return fk

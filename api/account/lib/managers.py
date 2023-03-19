@@ -1,23 +1,29 @@
 import logging
 from django.contrib.auth.base_user import BaseUserManager
-from django.db import transaction
-from django.db.models import Manager, Model
-from core.lib.manager_mixins import ManagesPolymorphicRelationships, ManagesSoftDeletables, ManagesTimestamps
+from core.lib import ManagesPolymorphicRelationships, ManagesSoftDeletables, ManagesTimestamps
 from typing import Optional, TYPE_CHECKING
 from account.lib.utils import validate_password, normalize_email
 from django.contrib.auth.hashers import make_password
-from account.lib.model_mixins import IsEmailable, IsPasswordProtected
 from django.utils import timezone
-from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
+from django.db.models import Manager
+from account.lib.querysets import UserQueryset, PasswordQuerySet, EmailAddressQuerySet, RedeemableKeyQuerySet
+
 
 if TYPE_CHECKING:
     from account.models import User
+    from account.lib.model_mixins import IsPasswordProtected
+
 
 class UserManager(ManagesSoftDeletables, ManagesTimestamps, BaseUserManager):
     """
     Custom user model manager where email is the unique identifiers
     """
+
+    use_for_related_fields = True
+
+    def get_queryset(self):
+        return UserQueryset(self.model, using=self._db)
 
     def create_user(self, email:str, username:Optional[str]=None, is_verified=False, raw_password:Optional[str]=None, **extra_fields):
         """
@@ -32,7 +38,7 @@ class UserManager(ManagesSoftDeletables, ManagesTimestamps, BaseUserManager):
         user = super().create(username=username, **extra_fields)
         if email:
             from account.models import EmailAddress
-            EmailAddress.objects.create(
+            user.email_addresses.create(
                 email=normalize_email(email),
                 is_verified=is_verified,
                 emailable=user,
@@ -74,7 +80,10 @@ class PasswordManager(ManagesSoftDeletables, ManagesTimestamps, ManagesPolymorph
 
     use_for_related_fields = True
 
-    def create(self, protected:IsPasswordProtected, raw_password: str, validate=True, **kwargs):
+    def get_queryset(self):
+        return PasswordQuerySet(self.model, using=self._db)
+
+    def create(self, protected:"IsPasswordProtected", raw_password: str, validate=True, **kwargs):
         """
         Create and save a password with a given protected model instance and a hashable raw password.
         """
@@ -84,62 +93,35 @@ class PasswordManager(ManagesSoftDeletables, ManagesTimestamps, ManagesPolymorph
         password = super().create(protected=protected, **kwargs)
         return password
 
-    def get_by_natural_key(self, password):
-        return self.get(**{password: password})
-
 
 class EmailAddressManager(ManagesTimestamps, ManagesPolymorphicRelationships, Manager):
     """
     Custom manager for the EmailAddress model.
-
-    @method create: Create and save an EmailAddress with the given email and user.
-    @method normalize_email: Normalize the email address by lowercasing the domain part of the email
-    @method primary: Return the primary email address for a user.
     """
 
     use_for_related_fields = True
 
-    def create(
-            self,
-            emailable:IsEmailable,
-            email:str,
-            is_verified=False,
-            **kwargs,
-        ):
-        """
-        Create and save an EmailAddress with the given email and user.
+    def get_queryset(self):
+        return EmailAddressQuerySet(self.model, using=self._db)
 
-        @param emailable: The user, or IsEmailable to associate with the email address.
-        @param email: The email address.
-        @param is_primary: Whether or not the email address is the primary email address for the user.
-        @param verified_at: The date and time the email address was verified.
-        @param is_verified: Whether or not the email address is verified, if true, set verified_at.
-        """
+    def create(self, is_verified=False, **kwargs):
+        # Check if the user already has a primary email address
 
-        verified_at = kwargs.get('verified_at')
-        if type(is_verified) is bool and verified_at:
-            raise ValueError("Cannot set verified_at and is_verified at the same time, simply use is_verified instead.")
-        elif is_verified:
-            verified_at = timezone.now()
+        verified_at = timezone.now() if is_verified else None
+        email_address = super().create(verified_at=verified_at, **kwargs)
 
-        if 'is_primary' in kwargs.keys():
-            raise ValueError("Cannot set is_primary directly, field is set automatically on creation.")
+        # Set the first email address as primary if the user doesn't have a primary email address
+        if not email_address.emailable_user.email_addresses.primary().exists():
+            email_address.set_primary()
 
-        return super().create(
-            emailable=emailable,
-            email=normalize_email(email),
-            is_primary=self.get_queryset().filter(emailable=emailable, is_primary=True).first() is None,
-            verified_at=verified_at,
-        )
+        return email_address
 
     def primary(self):
-        """
-        Return the primary email address for a user.
-        """
-        return self.get(is_primary=True)
+        return self.get_queryset().primary()
 
-    def get_by_natural_key(self, email):
-        return self.get(**{email: email})
+    def get_by_natural_key(self, email:str):
+        """Returns an email address for a given email"""
+        return self.get_queryset().get(email=email)
 
 
 class RedeemableKeyManager(ManagesTimestamps, ManagesPolymorphicRelationships, Manager):
@@ -147,38 +129,15 @@ class RedeemableKeyManager(ManagesTimestamps, ManagesPolymorphicRelationships, M
     Custom manager for the RedeemableKey model.
     """
 
-    def redeem(self, uuid, user, commit=True):
+    use_for_related_fields = True
+
+    def get_queryset(self):
+        return RedeemableKeyQuerySet(self.model, using=self._db)
+
+    def redeem(self, uuid, user, *args, **kwargs):
         """
         Redeem a redeemable key.
         """
         redeemable_key = self.get(uuid=uuid)
-        redeemable_key.redeem(user, commit=commit)
+        redeemable_key.redeem(user, *args, **kwargs)
         return redeemable_key
-
-    ###
-    # QuerySet methods
-    ###
-
-    def any(self):
-        """
-        Return a queryset of redeemable keys for any redeemable.
-        """
-        return super().all()
-
-    def redeemable(self):
-        """
-        Return a queryset of redeemable keys for any redeemable.
-        """
-        return super().filter(expired_at__isnull=True, redeemed_at__isnull=True)
-
-    def expired(self):
-        """
-        Return a queryset of expired redeemable keys.
-        """
-        return super().filter(expired_at__isnull=False)
-
-    def redeemed(self):
-        """
-        Return a queryset of redeemed redeemable keys.
-        """
-        return super().filter(redeemed_at__isnull=False)

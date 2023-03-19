@@ -1,10 +1,12 @@
 from typing import Type, TYPE_CHECKING
 from django.db.models import QuerySet
 
-if TYPE_CHECKING:
-    from core.lib.model_mixins import HasPolymorphicForeignKeys
 
-class PolycapableQueryset(QuerySet):
+if TYPE_CHECKING:
+    from .model_mixins import HasPolymorphicForeignKeys
+
+
+class PolycapableQuerySet(QuerySet):
     """
     A queryset that can be used to filter by polymorphic relationships.
     """

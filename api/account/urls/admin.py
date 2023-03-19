@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from account.views.admin import (
+from account.views import (
     UserViewSet,
     PasswordViewSet,
     EmailAddressViewSet,

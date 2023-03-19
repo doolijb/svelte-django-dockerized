@@ -1,16 +1,13 @@
 from abc import abstractmethod
-from inspect import Attribute
 from django.db import models
-from django.contrib.contenttypes.fields import GenericRelation
 from typing import TYPE_CHECKING, Optional
+from account.lib.managers import PasswordManager, EmailAddressManager, RedeemableKeyManager
+from account.lib.querysets import EmailAddressQuerySet
 
 if TYPE_CHECKING:
     from account.models import User, Password, EmailAddress
-    from account.lib.managers import PasswordManager, EmailAddressManager, RedeemableKeyManager
 
-"""
-Here we are using generic types to make it easier to type hint without causing circular imports.
-"""
+
 
 class IsRedeemable(models.Model):
     """
@@ -62,7 +59,7 @@ class IsPasswordProtected(models.Model):
         Returns the most recent password for the user.
         """
         from account.models import Password
-        if self._password:
+        if self._password and self._password.deleted_at is None:
             return self._password
         self._password = Password.objects.filter(protected=self, deleted_at__isnull=True).first()
         return self._password
@@ -101,13 +98,6 @@ class IsPasswordProtected(models.Model):
 
     password = property(get_password, set_password, delete_password)
 
-    class Meta:
-        # Index the active passwords for this mixin's model
-        # indexes: list[models.Index] = [
-        #     models.Index(fields=["passwords__is_active"]),
-        # ]
-        abstract=True
-
     def check_password(self, raw_password: str) -> bool:
         """
         Returns a boolean of whether the raw_password was correct. Handles
@@ -127,7 +117,7 @@ class IsEmailable(models.Model):
         abstract = True
 
     _primary_email_address: Optional["EmailAddress"] = None
-    email_addresses: "EmailAddressManager"
+    email_addresses = EmailAddressManager()
 
     def get_primary_email_address(self) -> Optional["EmailAddress"]:
         """
@@ -135,7 +125,7 @@ class IsEmailable(models.Model):
         """
         if self._primary_email_address:
             return self._primary_email_address
-        _primary_email_address = self.email_addresses.primary()
+        _primary_email_address = self.email_addresses.primary().first()
         return _primary_email_address
 
     def set_primary_email_address(self, value) -> None:
@@ -150,6 +140,10 @@ class IsEmailable(models.Model):
             kwargs = {"id": value.id}
         else:
             raise TypeError("Invalid value for primary email address, must be a string, int, or EmailAddress instance.")
+
+        # Update the other email addresses related to the emailable instance.
+        self.email_addresses.exclude(**kwargs).update(is_primary=False)
+
         self.email_addresses.filter(**kwargs).update(is_primary=True)
         self._primary_email_address = self.email_addresses.primary()
 

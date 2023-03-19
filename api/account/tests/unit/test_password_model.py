@@ -1,14 +1,10 @@
-# Import django logger
-from logging import getLogger
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from account.models import User, Password
 from typing import cast
 from rest_framework.response import Response
 
-from core.lib.tests import TestCase
-
-logger = getLogger(__name__)
+from core.lib import TestCase
 
 
 class PasswordModelTestCase(TestCase):

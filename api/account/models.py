@@ -2,26 +2,38 @@
 Models for the account app.
 """
 
-from os import truncate
 import textwrap
+from os import truncate
 from types import NoneType
+from typing import Literal, Optional, cast
+
+from django.apps import apps
 from django.conf import settings
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.transaction import atomic
+from django.forms import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from typing import Literal, Optional, Type, cast
-from django.contrib.auth.hashers import check_password
-from django.apps import apps
 
-from core.lib.model_mixins import HasPolymorphicForeignKeys, HasUuidId, HasTimestamps, HasSoftDelete
-from core.lib.model_fields import PolymorphicForeignKey, PolymorphicFKRelationship
+from core.lib import (
+    HasPolymorphicForeignKeys,
+    HasSoftDelete,
+    HasTimestamps,
+    HasUuidId,
+    PolymorphicFKRelationship,
+    PolymorphicForeignKey,
+)
 
-from .lib.managers import EmailAddressManager, PasswordManager, UserManager
-from .lib.model_mixins import IsEmailable, IsRedeemable, IsPasswordProtected
+from .lib import (
+    EmailAddressManager,
+    IsEmailable,
+    IsPasswordProtected,
+    IsRedeemable,
+    PasswordManager,
+    UserManager,
+)
 
 
 class User(
@@ -174,13 +186,10 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, HasPolymorphicForeign
             # If has emailable, is set to primary and primary field has changed.
             if self.emailable and self.is_primary and self.is_primary != self._original_is_primary:
                 # Set all other email addresses to non-primary.
-                queryset = EmailAddress.objects.filter(
-                    emailable=self.emailable,
-                    verified_at__isnull=False,
-                )
-                if self.id:
-                    queryset = queryset.exclude(id=self.id)
-                queryset.update(is_primary=False)
+                query = self.emailable.email_addresses
+                if self.pk:
+                    query = query.exclude(pk=self.pk)
+                query.update(is_primary=False)
 
                 # Update the username if the email address is changed.
                 if self.emailable is User and self.emailable.username != self.email and not settings.ENABLE_USERNAMES:
@@ -195,10 +204,8 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, HasPolymorphicForeign
         The email address may be deleted if it is not the primary email address, or
         if there are no other email addresses associated with the user.
         """
-        if self.is_primary:
-            raise ValueError(_("Cannot delete primary email address."))
-        if self.user.email_addresses.count() == 1:  # type: ignore
-            raise ValueError(_("Cannot delete only email address."))
+        if not self.emailable.email_addresses.exclude(pk=self.pk, is_primary=True).exists():
+            raise ValidationError(_("Cannot delete the only email address."))
         super().delete(*args, **kwargs)
 
     def is_valid_redemption(
@@ -228,7 +235,8 @@ class EmailAddress(HasUuidId, HasTimestamps, IsRedeemable, HasPolymorphicForeign
         """
         Sets the email address as the primary email address.
         """
-        self.objects.filter(emailable=self.emailable).update(is_primary=False)
+        self.is_primary = True
+        self.save()
 
 
 class RedeemableKey(HasUuidId, HasTimestamps, HasPolymorphicForeignKeys, models.Model):
@@ -254,10 +262,6 @@ class RedeemableKey(HasUuidId, HasTimestamps, HasPolymorphicForeignKeys, models.
     def __str__(self) -> str:
         return str(self.id)
 
-    def save(self, *args, **kwargs) -> None:
-        # TODO
-        super().save(*args, **kwargs)
-
     @property
     def redeemable_model(self) -> IsRedeemable | NoneType:
         return (
@@ -273,15 +277,19 @@ class RedeemableKey(HasUuidId, HasTimestamps, HasPolymorphicForeignKeys, models.
     @property
     def is_expired(self) -> bool:
         """Returns whether the key has expired or not."""
-        return self.date_expires < timezone.now()
+        return self.expires_at < timezone.now() if self.expires_at else False
 
     @property
     def can_redeem(self) -> bool:
         return not self.is_expired and not self.is_redeemed
 
+    def save(self, *args, **kwargs) -> None:
+        # TODO
+        super().save(*args, **kwargs)
+
     def expire(self) -> None:
         """Expires the key."""
-        self.date_expires: timezone.datetime = timezone.now()
+        self.expires_at = timezone.now()
         self.save()
 
     def stage_redemption(
