@@ -1,3 +1,4 @@
+from typing import cast
 from .model_fields import PolymorphicFK, PolymorphicFKRelationship
 from django.core.exceptions import ValidationError
 from django.db.models import Model
@@ -52,9 +53,10 @@ class HasPolymorphicForeignKeys(Model):
         Return the field name of the PolymorphicFK associated with a given PolymorphicRelationship and model.
         """
         for field in cls._meta.fields:
-            if isinstance(field, PolymorphicFK) and field.relationship_field is relationship and field.model is model:
+            if isinstance(field, PolymorphicFK) and field.relationship_field is relationship and field.related_model is model:
                 return field.name
         return None
+
 
     def save(self, *args, **kwargs):
         self.full_clean()

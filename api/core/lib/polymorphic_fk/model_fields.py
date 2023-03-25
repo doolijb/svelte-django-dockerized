@@ -14,14 +14,25 @@ class PolymorphicFKRelationship():
         self.on_delete = on_delete
         self.related_name = related_name
         self.related_fields = []
-        self._populated_field: Optional["PolymorphicFK"] = None
+        # TODO: FIX - This is behaving like a class property instead of a class instance property...
+        # self._populated_field: Optional["PolymorphicFK"] = None
 
     def __repr__(self) -> str:
         return f"PolymorphicRelationship(null={self.null}, on_delete={self.on_delete}, related_name='{self.related_name}')"
 
     def __get__(self, instance, owner):
-        if self.populated_field:
-            return self.populated_field.__get__(instance, owner)
+        if instance is None:
+            return self
+        # Disabling _populated_field for now until it's fixed...
+        # For now this will be slightly inefficient and will loop through all related fields
+        # elif not self._populated_field:
+        for fk in self.related_fields:
+            result = fk.__get__(instance, owner)
+            if result is not None:
+                self._populated_field = fk
+                return result
+        # else:
+        #     return self.populated_field.__get__(instance, owner)
         return None
 
     def __set__(self, instance, value: Optional[Model], propagate_down=True):
@@ -38,29 +49,25 @@ class PolymorphicFKRelationship():
                 raise ValueError(f"PolymorphicFKRelationship {self.related_name} cannot be empty")
             self._set_populated_field_to_none(propagate_down=propagate_down)
         else:
-            raise ValueError(f"Invalid value {value} for PolymorphicFK")
+            found_matching_model = False
+            for fk in instance._meta.fields:
+                # Make sure the field is a PolymorphicFK and that it is related to this relationship
+                if not isinstance(fk, PolymorphicFK) or fk.relationship_field != self:
+                    continue
 
-        for fk in instance._meta.fields:
-            # Make sure the field is a PolymorphicFK and that it is related to this relationship
-            if not isinstance(fk, PolymorphicFK) or fk.relationship_field != self:
-                raise ValueError(f"Invalid field {fk} for PolymorphicFKRelationship")
-
-            # If value is a model instance
-            if isinstance(value, fk.related_model):
-                if propagate_down:
-                    fk.__set__(instance, value, propagate_up=False)
-                self._set_populated_field(fk)
-            # Otherwise, null
-            else:
-                fk.__set__(instance, None, propagate_up=False)
-
-    def _get_populated_field(self):
-        if not self._populated_field:
-            for fk in self.related_fields:
-                if fk:
-                    self._populated_field = fk
+                # If value is a model instance
+                if isinstance(value, fk.related_model):
+                    if propagate_down:
+                        fk.__set__(instance, value, propagate_up=False)
+                    self._set_populated_field(fk)
+                    found_matching_model = True
                     break
-        return self._populated_field
+
+            if not found_matching_model:
+                raise ValueError(f"Invalid value {value} for PolymorphicFK")
+
+    # def _get_populated_field(self):
+    #     return self._populated_field
 
     def _set_populated_field_to_none(self, propagate_down=True):
         self.__set__(None, None, propagate_down=propagate_down)
@@ -75,10 +82,10 @@ class PolymorphicFKRelationship():
         """
         for existing_fk in self.related_fields:
             if existing_fk == fk:
-                raise ValueError(f"Model {fk.model.__name__} for field {fk.name} already exists in {existing_fk.name} for relationship {self.related_name}")
+                raise ValueError(f"Model {fk.related_model.__name__} for field {fk.name} already exists in {existing_fk.name} for relationship {self.related_name}")
         self.related_fields.append(fk)
 
-    populated_field = property(_get_populated_field, _set_populated_field, _set_populated_field_to_none)
+    # populated_field = property(_get_populated_field, _set_populated_field, _set_populated_field_to_none)
     populated_type: Optional[Type[Model]] = None # TODO: Needs getter, setter
 
     def get_field_for_model(self, model: Any):
@@ -104,7 +111,10 @@ class PolymorphicFK(ForeignKey):
     This should not be used directly. Instead, use the PolymorphicFK function. This is because
     child classes inherit parent constructor arguments, which we do not want.
     """
-    relationship_field:Optional[PolymorphicFKRelationship] = None
+
+    def __init__(self, *args, **kwargs):
+        self.relationship_field:Optional[PolymorphicFKRelationship] = None
+        super().__init__(*args, **kwargs)
 
     def __set__(self, instance, value: Optional[Any], propagate_up: bool = True):
         if propagate_up:

@@ -33,6 +33,7 @@ from .lib import (
     IsRedeemable,
     PasswordManager,
     UserManager,
+    RedeemableKeyManager
 )
 
 
@@ -245,7 +246,7 @@ class RedeemableKey(HasUuidId, HasTimestamps, HasPolymorphicForeignKeys, models.
     may not be required.
     """
 
-    user = models.ForeignKey("account.User", null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey("account.User", null=True, blank=True, on_delete=models.SET_NULL)
     redeemable = PolymorphicFKRelationship(null=False, on_delete=models.SET_NULL, related_name="redeemable_keys")
     redeemable_user = PolymorphicForeignKey(User, redeemable)
     redeemable_email_address = PolymorphicForeignKey(EmailAddress, redeemable)
@@ -253,7 +254,7 @@ class RedeemableKey(HasUuidId, HasTimestamps, HasPolymorphicForeignKeys, models.
     redeemed_at = models.DateTimeField(null=True, blank=True)
 
     staged_data = {}
-    objects = models.Manager()
+    objects = RedeemableKeyManager()
 
     class Meta:
         abstract=False

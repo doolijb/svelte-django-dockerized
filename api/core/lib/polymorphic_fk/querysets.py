@@ -36,9 +36,13 @@ def map_polymorphic_field_kwargs(self, **kwargs):
     for rel_field, rel_prop in relationships.items():
         if not rel_field:
             raise ValueError(f"Could not find relationship field name for relationship {rel_prop} in model {self.model}")
+
         if rel_field in kwargs:
-            model_field_name = self.model.get_relationship_model_field_name(rel_prop, self.model)
+            # Get PolymorphicFK belonging to the relationship, and the model type
+            model_field_name = self.model.get_relationship_model_field_name(rel_prop, type(kwargs[rel_field]))
             if not model_field_name:
                 raise ValueError(f"Could not foreign key field name for relationship {rel_field} and model {self.model}")
+
             kwargs[model_field_name] = kwargs.pop(rel_field)
+
     return kwargs
