@@ -24,7 +24,6 @@ cd /srv/www/server/
 cat unit.conf.dev.json | curl -X PUT -d@- localhost:8090/config
 ```
 
-
 ## api - Django 4.0
 `Unit`: `http://localhost:8000/api` -> `https://example.com/api`
 

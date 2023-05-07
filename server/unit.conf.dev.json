@@ -41,7 +41,7 @@
                 "match": {
                     "uri": [
                         "/dev/sb*",
-                        "dev/storybook*"
+                        "/dev/storybook*"
                     ]
                 }
             },

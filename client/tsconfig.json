@@ -1,0 +1,30 @@
+{
+    "extends": "@tsconfig/svelte/tsconfig.json",
+    "compilerOptions": {
+        "target": "ESNext",
+        "useDefineForClassFields": true,
+        "module": "ESNext",
+        "resolveJsonModule": true,
+        "allowJs": true,
+        "checkJs": true,
+        "isolatedModules": true,
+        "baseUrl": ".",
+        "paths": {
+            "@components": ["./src/components/index"],
+            "@components/*": ["./src/components/*"],
+            "@decorators": ["src/components/.decorators/index"],
+            "@interfaces": ["./src/interfaces/index"],
+            "@interfaces/*": ["./src/interfaces/*"],
+            "@stores": ["./src/stores/index"],
+            "@stores/*": ["./src/stores/*"],
+            "@themes/*": ["src/themes/*"],
+        }
+    },
+    "include": [
+        "src/**/*.d.ts",
+        "src/**/*.ts",
+        "src/**/*.js",
+        "src/**/*.svelte"
+    ],
+    "references": [{ "path": "./tsconfig.node.json" }]
+}

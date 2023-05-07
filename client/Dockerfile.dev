@@ -1,5 +1,5 @@
 # pull official lts base image
-FROM node:18-bullseye-slim
+FROM node:19-bullseye
 
 WORKDIR /srv/www/client
 
