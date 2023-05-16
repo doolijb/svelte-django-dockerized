@@ -1,39 +1,11 @@
 {
     "listeners": {
-        "*:1337": {
-            "pass": "routes/clientPassthrough"
-        },
-        "*:6006": {
-            "pass": "routes/storybookPassthrough"
-        },
         "*:8000": {
             "pass": "routes/main"
         }
     },
     "routes": {
-        "clientPassthrough": [
-            {
-                "action": {
-                    "proxy": "http://172.20.0.90:6006"
-                },
-                "match": {
-                    "uri": [
-                        "*"
-                    ]
-                }
-            }
-        ],
         "main": [
-            {
-                "action": {
-                    "proxy": "http://172.20.0.60:6006"
-                },
-                "match": {
-                    "uri": [
-                        "/sb*"
-                    ]
-                }
-            },
             {
                 "action": {
                     "proxy": "http://172.20.0.90:6006"
@@ -47,7 +19,7 @@
             },
             {
                 "action": {
-                    "proxy": "http://127.0.0.1:8080"
+                    "proxy": "http://127.0.0.1:8000"
                 },
                 "match": {
                     "uri": [
@@ -65,18 +37,6 @@
                         "*",
                         "/*",
                         "/static*"
-                    ]
-                }
-            }
-        ],
-        "storybookPassthrough": [
-            {
-                "action": {
-                    "proxy": "http://172.20.0.90:1337"
-                },
-                "match": {
-                    "uri": [
-                        "*"
                     ]
                 }
             }

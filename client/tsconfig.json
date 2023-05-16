@@ -1,30 +1,56 @@
 {
-    "extends": "@tsconfig/svelte/tsconfig.json",
     "compilerOptions": {
-        "target": "ESNext",
-        "useDefineForClassFields": true,
-        "module": "ESNext",
-        "resolveJsonModule": true,
         "allowJs": true,
+        "baseUrl": ".",
         "checkJs": true,
         "isolatedModules": true,
-        "baseUrl": ".",
+        "module": "ESNext",
         "paths": {
-            "@components": ["./src/components/index"],
-            "@components/*": ["./src/components/*"],
-            "@decorators": ["src/components/.decorators/index"],
-            "@interfaces": ["./src/interfaces/index"],
-            "@interfaces/*": ["./src/interfaces/*"],
-            "@stores": ["./src/stores/index"],
-            "@stores/*": ["./src/stores/*"],
-            "@themes/*": ["src/themes/*"],
-        }
+            "@components": [
+                "./src/components/index"
+            ],
+            "@components/*": [
+                "./src/components/*"
+            ],
+            "@constants": [
+                "src/constants/index"
+            ],
+            "@decorators": [
+                "src/components/.decorators/index"
+            ],
+            "@interfaces": [
+                "./src/interfaces/index"
+            ],
+            "@interfaces/*": [
+                "./src/interfaces/*"
+            ],
+            "@stores": [
+                "./src/stores/index"
+            ],
+            "@stores/*": [
+                "./src/stores/*"
+            ],
+            "@themes/*": [
+                "src/themes/*"
+            ],
+            "@validators": [
+                "./src/validators/index"
+            ]
+        },
+        "resolveJsonModule": true,
+        "target": "ESNext",
+        "useDefineForClassFields": true
     },
+    "extends": "@tsconfig/svelte/tsconfig.json",
     "include": [
         "src/**/*.d.ts",
         "src/**/*.ts",
         "src/**/*.js",
         "src/**/*.svelte"
     ],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        }
+    ]
 }

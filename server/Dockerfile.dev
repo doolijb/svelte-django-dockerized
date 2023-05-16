@@ -16,7 +16,7 @@
 # # # # # # # # # # # # # # # # # # #
 
 # Use the NGINX Unit image, which is based on Debian
-FROM nginx/unit:1.29.0-python3.11
+FROM unit:1.30.0-python3.11
 
 # # # # # # # # # # # # # # # # # # # #
 # # DEV ONLY ENV VARIABLES            #

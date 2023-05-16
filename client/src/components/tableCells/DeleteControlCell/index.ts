@@ -4,4 +4,4 @@
  * export { default } from './ComponentName.svelte'
  */
 
-export { default } from './DeleteControlCell.svelte'
+export {default} from "./DeleteControlCell.svelte"

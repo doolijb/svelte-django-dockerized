@@ -1,20 +1,23 @@
+/* eslint-disable no-undef */
+/* eslint-disable @typescript-eslint/no-var-requires */
 const config = {
-    darkMode: 'class',
-  content: [
-    "./src/**/*.{html,js,svelte,ts}",
-    require('path').join(require.resolve(
-        '@skeletonlabs/skeleton'),
-        '../**/*.{html,js,svelte,ts}'
-    )
-],
+    darkMode: "class",
+    content: [
+        "./src/**/*.{html,js,svelte,ts}",
+        require("path").join(
+            require.resolve("@skeletonlabs/skeleton"),
+            "../**/*.{html,js,svelte,ts}"
+        )
+    ],
 
-  theme: {
-    extend: {},
-  },
+    theme: {
+        extend: {}
+    },
 
-  plugins: [
-    ...require('@skeletonlabs/skeleton/tailwind/skeleton.cjs')()
-  ],
-};
+    plugins: [
+        require("@tailwindcss/forms"),
+        ...require("@skeletonlabs/skeleton/tailwind/skeleton.cjs")()
+    ]
+}
 
-module.exports = config;
+module.exports = config

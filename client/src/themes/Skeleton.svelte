@@ -1,27 +1,22 @@
 <script lang="ts">
     /**
      * This is a component that imports the skeleton theme and styles.
-    */
+     */
     import "@skeletonlabs/skeleton/themes/theme-skeleton.css"
     import "@skeletonlabs/skeleton/styles/all.css"
 
-    export let theme: string = ""
-    export let dark: boolean = false
+    export let theme = ""
+    export let dark = false
 </script>
 
-<div data-theme={theme} class:dark>
+<div class="dark:text-gray-100" data-theme={theme} class:dark>
     <slot name="body" />
 </div>
 
 <style lang="postcss">
-
-    :not(.dark) {
+    /* :not(.dark) {
         @apply bg-primary-100 text-primary-800;
-    }
-
-    .dark {
-        @apply bg-primary-100 text-primary-900;
-    }
+    } */
 
     /* :not(.dark) :global(th) {
             @apply text-dark;
@@ -30,6 +25,4 @@
     .dark :global(th) {
             @apply text-dark;
         } */
-
-
 </style>

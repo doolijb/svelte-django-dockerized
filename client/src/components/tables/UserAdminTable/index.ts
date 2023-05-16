@@ -4,4 +4,4 @@
  * export { default } from './ComponentName.svelte'
  */
 
-export { default } from './EditControlCell.svelte'
+export {default} from "./UserAdminTable.svelte"

@@ -1,32 +1,41 @@
 <script lang="ts">
-    import type { EmailAddress } from "src/interfaces/index"
-    import { BoolCell, TextCell, DeleteControlCell, EditControlCell } from '@components'
-    import Icon from "@iconify/svelte";
-    import { clipboard, Paginator, Table, tableMapperValues } from "@skeletonlabs/skeleton"
+    import type {EmailAddress} from "src/interfaces/index"
+    import {
+        BoolCell,
+        TextCell,
+        DeleteControlCell,
+        ViewControlCell
+    } from "@components"
+    import Icon from "@iconify/svelte"
+    import {
+        clipboard,
+        Paginator,
+        Table,
+        tableMapperValues
+    } from "@skeletonlabs/skeleton"
 
-    export let emailAddresses = new Map<string, EmailAddress>();
+    export let emailAddresses = new Map<string, EmailAddress>()
 
-    export let pageCount = 0;
+    export let pageCount = 0
 
-    const iconWidth = "1.5em";
+    const iconWidth = "1.5em"
 
     function getBoolDisplay(value: boolean): string {
-        return value ? "TRUE" : "FALSE";
+        return value ? "TRUE" : "FALSE"
     }
-
 </script>
 
 <div class="table-container">
-    <table class="table table-hover text-inherit">
+    <table class="table-hover table text-inherit">
         <thead>
             <tr>
                 <th>Id</th>
                 <th>Email</th>
-                <th>Primary</th>
-                <th>Verified</th>
-                <th>Emailable</th>
-                <th>Edit</th>
-                <th>Delete</th>
+                <th class="text-center">Primary</th>
+                <th class="text-center">Verified</th>
+                <th class="text-center">Emailable</th>
+                <th class="text-center">View</th>
+                <th class="text-center">Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -46,14 +55,18 @@
                             />
                         {/if}
                     </td>
-                    <EditControlCell
+                    <ViewControlCell
                         onClick={({e: event, row: EmailAddress}) => {
-                            console.log(`Edit Email Address Clicked for ${row.id}`);
+                            console.log(
+                                `View Email Address Clicked for ${row.id}`
+                            )
                         }}
                     />
                     <DeleteControlCell
                         onClick={({e: event, row: EmailAddress}) => {
-                            console.log(`Delete Email Address Clicked for ${row.id}`);
+                            console.log(
+                                `Delete Email Address Clicked for ${row.id}`
+                            )
                         }}
                     />
                 </tr>
@@ -61,8 +74,7 @@
         </tbody>
     </table>
 
-    <Paginator pageCount={pageCount} class="mt-1" />
-
+    <Paginator {pageCount} class="mt-1" />
 </div>
 
 <style>

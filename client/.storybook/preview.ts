@@ -1,8 +1,8 @@
-import type { Preview } from "@storybook/svelte";
-import { ThemeProvider } from "../src/components/layout"
+import type {Preview} from "@storybook/svelte"
+import {ThemeProvider} from "../src/components/layout"
 import themeMap from "../src/themes/themeMap"
 
-const themes = new Array<{ value: string, title: string }>()
+const themes = new Array<{value: string; title: string}>()
 // loop over theme values
 for (const theme of themeMap.values()) {
     themes.push({
@@ -11,16 +11,15 @@ for (const theme of themeMap.values()) {
     })
 }
 
-
 const preview: Preview = {
     parameters: {
-        actions: { argTypesRegex: "^on[A-Z].*" },
+        actions: {argTypesRegex: "^on[A-Z].*"},
         controls: {
             matchers: {
                 color: /(background|color)$/i,
-                date: /Date$/,
-            },
-        },
+                date: /Date$/
+            }
+        }
     },
     decorators: [
         (args, story) => ({
@@ -52,10 +51,10 @@ const preview: Preview = {
                 dynamicTitle: true,
                 icon: "circlehollow",
                 items: [
-                    { value: false, title: "Light", icon: "sun" },
-                    { value: true, title: "Dark", icon: 'moon' }
+                    {value: false, title: "Light", icon: "sun"},
+                    {value: true, title: "Dark", icon: "moon"}
                 ],
-                showName: true,
+                showName: true
             }
         }
     }

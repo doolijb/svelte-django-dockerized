@@ -37,10 +37,8 @@ services:
       default:
         ipv4_address: 172.20.0.10
     ports:
-      - 8000:8000
+      - 8080:8080
       - 8090:8090
-      - 1337:1337
-      - 6006:6006
     env_file:
       - ./.env.dev
     depends_on:
@@ -120,6 +118,9 @@ services:
     networks:
       default:
         ipv4_address: 172.20.0.90
+    ports:
+        - 1337:1337
+        - 6006:6006
     env_file:
       - ./.env.dev
     restart: on-failure

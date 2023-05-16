@@ -1,4 +1,7 @@
 {
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
     "[yaml]": {
         "editor.tabSize": 4
     },
@@ -24,6 +27,6 @@
     },
     "git.ignoreLimitWarning": true,
     "prettier.tabWidth": 4,
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "vetur.format.options.tabSize": 4
 }

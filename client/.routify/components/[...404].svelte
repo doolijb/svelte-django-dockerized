@@ -1,8 +1,8 @@
 <script context="module">
-    export const load = ({ route }) => ({
+    export const load = ({route}) => ({
         status: 404,
-        error: '[Routify] Page could not be found.',
-        props: { url: route.url },
+        error: "[Routify] Page could not be found.",
+        props: {url: route.url}
     })
 </script>
 

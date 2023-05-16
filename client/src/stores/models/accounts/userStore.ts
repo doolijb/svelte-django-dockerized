@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store'
-import type { User } from 'src/interfaces'
+import {writable} from "svelte/store"
+import type {User} from "src/interfaces"
 
 class UserStore {
     objects: any

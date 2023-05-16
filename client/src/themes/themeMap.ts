@@ -1,4 +1,3 @@
-
 interface Theme {
     title: string
     value: string
@@ -11,57 +10,57 @@ const themes: Theme[] = []
 const themeMap = new Map<string, Theme>()
 
 themes.push({
-    title: 'Crimson',
-    value: 'crimson',
-    enabled: true,
+    title: "Crimson",
+    value: "crimson",
+    enabled: true
 })
 
 themes.push({
-    title: 'Gold Nouveau',
-    value: 'gold-nouveau',
-    enabled: true,
+    title: "Gold Nouveau",
+    value: "gold-nouveau",
+    enabled: true
 })
 
 themes.push({
-    title: 'Hamlindigo',
-    value: 'hamlindigo',
-    enabled: true,
+    title: "Hamlindigo",
+    value: "hamlindigo",
+    enabled: true
 })
 
 themes.push({
-    title: 'Modern',
-    value: 'modern',
-    enabled: true,
+    title: "Modern",
+    value: "modern",
+    enabled: true
 })
 
 themes.push({
-    title: 'Rocket',
-    value: 'rocket',
-    enabled: true,
+    title: "Rocket",
+    value: "rocket",
+    enabled: true
 })
 
 themes.push({
-    title: 'Sahara',
-    value: 'sahara',
-    enabled: true,
+    title: "Sahara",
+    value: "sahara",
+    enabled: true
 })
 
 themes.push({
-    title: 'Seafoam',
-    value: 'seafoam',
-    enabled: true,
+    title: "Seafoam",
+    value: "seafoam",
+    enabled: true
 })
 
 themes.push({
-    title: 'Skeleton (Default)',
-    value: 'skeleton',
+    title: "Skeleton (Default)",
+    value: "skeleton",
     enabled: true,
-    notes: 'Default theme'
+    notes: "Default theme"
 })
 
 themes.push({
-    title: 'Vintage',
-    value: 'vintage',
+    title: "Vintage",
+    value: "vintage",
     enabled: false
 })
 

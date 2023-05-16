@@ -4,7 +4,7 @@ This is an opinionated project template emphasizing productivity, allowing devel
 
 # Stack
 
-## server - NGINX Unit, Python 3.10
+## server - NGINX Unit, Python 3.11
 
 Handles high level routing for the entire application and natively serves static files, and the backend Django ASGI. Proxies the appropriate upstream containers and services to the public.
 

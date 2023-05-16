@@ -10,7 +10,7 @@ export interface User {
 
 const minimalUser: User = {
     id: "123-456-789",
-    username: "johndoe",
+    username: "johndoe"
 }
 
 const exampleUser: User = {
@@ -19,10 +19,10 @@ const exampleUser: User = {
     lastName: "Doe",
     isAdmin: false,
     created_at: "2021-01-01T00:00:00.000Z",
-    updated_at: "2021-01-01T00:00:00.000Z",
+    updated_at: "2021-01-01T00:00:00.000Z"
 }
 
 export const examples = {
     minimalUser,
-    exampleUser,
+    exampleUser
 }

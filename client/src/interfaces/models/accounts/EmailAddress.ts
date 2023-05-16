@@ -18,7 +18,7 @@ const minimal: EmailAddress = {
     emailable_type: "User",
     emailable_id: "123-123-456",
     created_at: "2021-01-01T00:00:00.000Z",
-    updated_at: null,
+    updated_at: null
 }
 
 /**
@@ -29,10 +29,10 @@ const example: EmailAddress = {
     ...minimal,
     isPrimary: true,
     isVerified: true,
-    updated_at: "2021-01-01T00:00:00.000Z",
+    updated_at: "2021-01-01T00:00:00.000Z"
 }
 
 export const exampleEmailAddresses = {
     minimal,
-    example,
+    example
 }

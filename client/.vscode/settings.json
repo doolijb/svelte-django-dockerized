@@ -3,6 +3,9 @@
     "editor.detectIndentation": false,
     "editor.insertSpaces": true,
     "editor.tabSize": 4,
+    "javascript.preferences.quoteStyle": "double",
     "remote.autoForwardPorts": false,
+    "remote.forwardOnOpen": false,
+    "svelte.enable-ts-plugin": true,
     "task.problemMatchers.neverPrompt": true
 }

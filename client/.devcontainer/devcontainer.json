@@ -1,22 +1,31 @@
 {
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-azuretools.vscode-docker",
+                "formulahendry.auto-rename-tag",
+                "ms-python.python",
+                "svelte.svelte-vscode",
+                "waderyan.gitblame",
+                "ms-python.isort",
+                "haugerbr.project-tasks",
+                "redhat.vscode-yaml",
+                "dbaeumer.vscode-eslint",
+                "yoavbls.pretty-ts-errors"
+            ],
+            "settings": {
+                "remote.forwardOnOpen": false
+            }
+        }
+    },
     "dockerComposeFile": [
         "../../docker-compose.yml"
     ],
-    "extensions": [
-        "ms-azuretools.vscode-docker",
-        "formulahendry.auto-rename-tag",
-        "ms-python.python",
-        "svelte.svelte-vscode",
-        "waderyan.gitblame",
-        "ms-python.isort",
-        "haugerbr.project-tasks",
-        "redhat.vscode-yaml"
-    ],
     "name": "client",
+    "otherPortsAttributes": {
+        "onAutoForward": "ignore"
+    },
     "overrideCommand": true,
     "service": "client",
-    "settings": {
-        "remote.autoForwardPorts": false
-    },
     "workspaceFolder": "/srv/www/client"
 }

@@ -4,4 +4,4 @@
  * export { default } from './ComponentName.svelte'
  */
 
-export { default } from './TextCell.svelte'
+export {default} from "./TextCell.svelte"

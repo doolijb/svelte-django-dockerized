@@ -1,26 +1,28 @@
 import Component from "."
-import { TableDataDecorator } from '@decorators'
-import { faker } from '@faker-js/faker';
-import type { Meta } from '@storybook/svelte';
+import {TableDataDecorator} from "@decorators"
+import {faker} from "@faker-js/faker"
+import type {Meta} from "@storybook/svelte"
 
 const meta: Meta<typeof Component> = {
     // Automatically generate the component name as "Table cells/BoolCell"
 
     component: Component as any,
-    tags: ['autodocs'],
+    tags: ["autodocs"],
     decorators: [() => TableDataDecorator as any],
-    argTypes: { // @ts-ignore
+    argTypes: {
+        // @ts-ignore - Works as is
         text: {
-            description: 'The text to display',
+            description: "The text to display",
             options: [true, false, null],
             control: {
-                type: 'text',
+                type: "text"
             }
         },
         copy: {
-            description: 'Content that will be copied to the clipboard, i.e. if text is truncated',
+            description:
+                "Content that will be copied to the clipboard, i.e. if text is truncated",
             control: {
-                type: 'text',
+                type: "text"
             }
         }
     }
@@ -28,15 +30,15 @@ const meta: Meta<typeof Component> = {
 
 export default meta
 
-const Template = (args: { value: boolean }) => ({
+const Template = (args: {value: boolean}) => ({
     Component,
-    props: args,
-});
+    props: args
+})
 
 export const NormalText = {
     render: Template,
     args: {
-        text: faker.internet.email(),
+        text: faker.internet.email()
     }
 }
 

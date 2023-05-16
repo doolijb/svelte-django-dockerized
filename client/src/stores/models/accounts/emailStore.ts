@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store'
-import type { EmailAddress } from 'src/interfaces'
+import {writable} from "svelte/store"
+import type {EmailAddress} from "src/interfaces"
 
 class EmailStore {
     objects: any

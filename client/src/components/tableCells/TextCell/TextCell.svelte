@@ -1,8 +1,8 @@
 <script lang="ts">
-    import Icon from "@iconify/svelte";
-    import { clipboard } from "@skeletonlabs/skeleton"
+    import Icon from "@iconify/svelte"
+    import {clipboard} from "@skeletonlabs/skeleton"
 
-    export let text: string = ""
+    export let text = ""
     export let copy: string = null
 
     $: copyText = copy ? copy : text
@@ -16,16 +16,19 @@
     class="select-none"
     {title}
     use:clipboard={copyText}
-    on:focus={() => focused = true}
-    on:focusout={() => focused = false}
-    on:mouseover={() => focused = true}
-    on:mouseleave={() => focused = false}
+    on:focus={() => (focused = true)}
+    on:focusout={() => (focused = false)}
+    on:mouseover={() => (focused = true)}
+    on:mouseleave={() => (focused = false)}
 >
-    <slot text={text}>
+    <slot {text}>
         <span class="flex">
             {text}
             {#if copyText}
-                <Icon icon="mdi:content-copy" class="ms-2 mt-1 {!focused ? 'invisible' : ''}" />
+                <Icon
+                    icon="mdi:content-copy"
+                    class="ms-2 mt-1 {!focused ? 'invisible' : ''}"
+                />
             {/if}
         </span>
     </slot>

@@ -1,1 +1,1 @@
-export { default as AdminEmailAddressTable } from './EmailAddressAdminTable'
+export {default as AdminEmailAddressTable} from "./EmailAddressAdminTable"
