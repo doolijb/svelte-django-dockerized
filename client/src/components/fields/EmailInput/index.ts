@@ -1,1 +1,1 @@
-export { default } from "./EmailInput.svelte"
+export {default} from "./EmailInput.svelte"

@@ -1,8 +1,8 @@
-import type { Meta } from "@storybook/svelte"
+import type {Meta} from "@storybook/svelte"
 import Component from "."
-import type { ComponentType } from "svelte"
+import type {ComponentType} from "svelte"
 import baseTextInputMeta from "@components/fields/BaseTextInput/BaseTextInput.stories"
-import { faker } from "@faker-js/faker"
+import {faker} from "@faker-js/faker"
 
 const meta: Meta<typeof Component> = {
     ...baseTextInputMeta,
@@ -11,7 +11,7 @@ const meta: Meta<typeof Component> = {
 
 export default meta
 
-const Template = (args: { value: boolean }) => ({
+const Template = (args: {value: boolean}) => ({
     Component,
     props: args
 })
@@ -31,6 +31,6 @@ export const Filled = {
 export const FilledWithErrors = {
     render: Template,
     args: {
-        value: faker.internet.userName(),
+        value: faker.internet.userName()
     }
 }

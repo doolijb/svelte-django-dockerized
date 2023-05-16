@@ -7,7 +7,7 @@
         lowercaseRequiredValidator,
         uppercaseRequiredValidator,
         numberRequiredValidator,
-        specialCharRequiredValidator,
+        specialCharRequiredValidator
     } from "@validators"
 
     export let label: string = "Password"
@@ -19,7 +19,7 @@
         lowercaseRequiredValidator(),
         uppercaseRequiredValidator(),
         numberRequiredValidator(),
-        specialCharRequiredValidator(),
+        specialCharRequiredValidator()
     ]
     export let required: boolean = false
     export let value: string = ""

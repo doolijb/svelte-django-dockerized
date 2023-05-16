@@ -1,5 +1,5 @@
-import type { PopupSettings } from "@skeletonlabs/skeleton"
-import { v4 as uuidv4 } from "uuid"
+import type {PopupSettings} from "@skeletonlabs/skeleton"
+import {v4 as uuidv4} from "uuid"
 
 export const makePopup: () => PopupSettings = () => ({
     event: "hover",
@@ -58,7 +58,9 @@ export const numberRequiredValidator = (count = 1) => ({
     key: "numberRequired",
     badge: "Number Required",
     sticky: false,
-    message: `This field must have at least ${count} number${ count > 1 ? "s" : ""}`,
+    message: `This field must have at least ${count} number${
+        count > 1 ? "s" : ""
+    }`,
     popup: makePopup(),
     test: (value: any) => {
         const numbers = value.match(/\d/g) || []
@@ -70,7 +72,9 @@ export const uppercaseRequiredValidator = (count = 1) => ({
     key: "uppercaseRequired",
     badge: "Uppercase Required",
     sticky: false,
-    message: `This field must have at least ${count} uppercase letter${ count > 1 ? "s" : ""}`,
+    message: `This field must have at least ${count} uppercase letter${
+        count > 1 ? "s" : ""
+    }`,
     popup: makePopup(),
     test: (value: any) => {
         const uppercase = value.match(/[A-Z]/g) || []
@@ -82,7 +86,9 @@ export const lowercaseRequiredValidator = (count = 1) => ({
     key: "lowercaseRequired",
     badge: "Lowercase Required",
     sticky: false,
-    message: `This field must have at least ${count} lowercase letter${ count > 1 ? "s" : ""}`,
+    message: `This field must have at least ${count} lowercase letter${
+        count > 1 ? "s" : ""
+    }`,
     popup: makePopup(),
     test: (value: any) => {
         const lowercase = value.match(/[a-z]/g) || []
@@ -90,14 +96,51 @@ export const lowercaseRequiredValidator = (count = 1) => ({
     }
 })
 
-export const specialCharRequiredValidator = (count = 1, options = ["!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "+", "="]) => ({
+export const specialCharRequiredValidator = (
+    count = 1,
+    choices = [
+        "!",
+        "@",
+        "#",
+        "$",
+        "%",
+        "^",
+        "&",
+        "*",
+        "(",
+        ")",
+        "-",
+        "_",
+        "=",
+        "+",
+        "[",
+        "]",
+        "{",
+        "}",
+        ";",
+        ":",
+        ",",
+        ".",
+        "<",
+        ">",
+        "?",
+        "/",
+        "|",
+        "~",
+        "`"
+    ]
+) => ({
     key: "specialCharRequired",
     badge: "Special Character Required",
     sticky: false,
-    message: `This field must have at least ${count} special character${ count > 1 ? "s" : ""}, such as ${options.join(", ")}`,
+    message: `This field must have at least ${count} special character${
+        count > 1 ? "s" : ""
+    }, such as ${choices.join(", ")}`,
     popup: makePopup(),
     test: (value: any) => {
-        const specialChars = value.match(new RegExp(`[${options.join("")}]`)) || []
+        const escaped_chars = choices.map(char => "\\" + char).join("")
+        const regex = new RegExp("[" + escaped_chars + "]", "g")
+        const specialChars = value.match(regex) || []
         return value && specialChars && specialChars.length < count
     }
 })

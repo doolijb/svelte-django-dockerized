@@ -1,6 +1,6 @@
-import type { Meta } from "@storybook/svelte"
+import type {Meta} from "@storybook/svelte"
 import Component from "."
-import type { ComponentType } from "svelte"
+import type {ComponentType} from "svelte"
 import {
     requiredValidator,
     minLengthValidator,
@@ -82,7 +82,7 @@ const meta: Meta<typeof Component> = {
 
 export default meta
 
-const Template = (args: { value: boolean }) => ({
+const Template = (args: {value: boolean}) => ({
     Component,
     props: args
 })
@@ -109,11 +109,10 @@ export const Disabled = {
     }
 }
 
-
 export const WithPlaceholder = {
     render: Template,
     args: {
-        placeholder: "Enter your name",
+        placeholder: "Enter your name"
     }
 }
 
