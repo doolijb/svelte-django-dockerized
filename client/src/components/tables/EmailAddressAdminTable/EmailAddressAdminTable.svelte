@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {EmailAddress} from "src/interfaces/index"
+    import type {IEmailAddress} from "src/interfaces/index"
     import {
         BoolCell,
         TextCell,
@@ -14,7 +14,7 @@
         tableMapperValues
     } from "@skeletonlabs/skeleton"
 
-    export let emailAddresses = new Map<string, EmailAddress>()
+    export let emailAddresses = new Map<string, IEmailAddress>()
 
     export let pageCount = 0
 

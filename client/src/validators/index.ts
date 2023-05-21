@@ -1,5 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type {PopupSettings} from "@skeletonlabs/skeleton"
+import {get} from "svelte/store"
 import {v4 as uuidv4} from "uuid"
+import {sentenceCase} from "change-case"
+import parsePhoneNumber, {type CountryCode} from "libphonenumber-js"
+import type {IFieldValidator} from "@interfaces"
 
 export const makePopup: () => PopupSettings = () => ({
     event: "hover",
@@ -7,140 +12,256 @@ export const makePopup: () => PopupSettings = () => ({
     placement: "top"
 })
 
-export const requiredValidator = () => ({
+export const requiredValidator = (
+    args = {fieldName: null as string}
+): IFieldValidator => ({
+    args,
     key: "required",
     badge: "Required",
     sticky: true,
     message: "This field is required",
     popup: makePopup(),
-    test: (value: any) =>
-        !value || value === undefined || value === null || value === ""
+    test: (value: string) =>
+        !!value || value === undefined || value === null || value === ""
 })
 
-export const minLengthValidator = (minLen = 3) => ({
+export const minLengthValidator = (
+    args = {fieldName: null as string, minLen: 3}
+): IFieldValidator => ({
+    args,
     key: "minLength",
     badge: "Min length",
     sticky: false,
-    message: `This field must be at least ${minLen} characters long`,
+    message: `Must be at least ${args.minLen} characters long`,
     popup: makePopup(),
-    test: (value: any) => value && value.length < minLen
+    test: (value: string) => (value ? value.length >= args.minLen : true)
 })
 
-export const maxLengthValidator = (maxLen = 20) => ({
+export const maxLengthValidator = (
+    args = {fieldName: null as string, maxLen: 20}
+): IFieldValidator => ({
+    args,
     key: "maxLength",
     badge: "Max length",
     sticky: false,
-    message: `This field must be at most ${maxLen} characters long`,
+    message: `Must be at most ${args.maxLen} characters long`,
     popup: makePopup(),
-    test: (value: any) => value && value.length > maxLen
+    test: (value: string) => (value ? value.length <= args.maxLen : true)
 })
 
-export const specialCharValidator = () => ({
+export const specialCharValidator = (
+    args = {fieldName: null as string}
+): IFieldValidator => ({
+    args,
     key: "specialChar",
     badge: "Special characters",
     sticky: false,
-    message: "This field must not contain spaces or special characters",
+    message: "Must not contain spaces or special characters",
     popup: makePopup(),
-    test: (value: any) => value && !/^[a-zA-Z0-9_]+$/.test(value)
+    test: (value: string) => (value ? /^[a-zA-Z0-9_]+$/.test(value) : true)
 })
 
-export const emailValidator = () => ({
+export const emailValidator = (
+    args = {fieldName: null as string}
+): IFieldValidator => ({
+    args,
     key: "email",
     badge: "Email",
     sticky: false,
-    message: "This field must be a valid email address",
+    message: "Must be a valid email address",
     popup: makePopup(),
-    test: (value: any) =>
-        value && !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)
+    test: (value: string) =>
+        value ? /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value) : true
 })
 
-export const numberRequiredValidator = (count = 1) => ({
+export const numberRequiredValidator = (
+    args = {fieldName: null as string, count: 1}
+): IFieldValidator => ({
+    args,
     key: "numberRequired",
     badge: "Number Required",
     sticky: false,
-    message: `This field must have at least ${count} number${
-        count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} number${
+        args.count > 1 ? "s" : ""
     }`,
     popup: makePopup(),
-    test: (value: any) => {
+    test: (value: string) => {
         const numbers = value.match(/\d/g) || []
-        return value && numbers && numbers.length < count
+        return value ? numbers && numbers.length >= args.count : true
     }
 })
 
-export const uppercaseRequiredValidator = (count = 1) => ({
+export const uppercaseRequiredValidator = (
+    args = {fieldName: null as string, count: 1}
+): IFieldValidator => ({
+    args,
     key: "uppercaseRequired",
     badge: "Uppercase Required",
     sticky: false,
-    message: `This field must have at least ${count} uppercase letter${
-        count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} uppercase letter${
+        args.count > 1 ? "s" : ""
     }`,
     popup: makePopup(),
     test: (value: any) => {
         const uppercase = value.match(/[A-Z]/g) || []
-        return value && uppercase && uppercase.length < count
+        return value ? uppercase && uppercase.length >= args.count : true
     }
 })
 
-export const lowercaseRequiredValidator = (count = 1) => ({
+export const lowercaseRequiredValidator = (
+    args = {fieldName: null as string, count: 1}
+): IFieldValidator => ({
+    args,
     key: "lowercaseRequired",
     badge: "Lowercase Required",
     sticky: false,
-    message: `This field must have at least ${count} lowercase letter${
-        count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} lowercase letter${
+        args.count > 1 ? "s" : ""
     }`,
     popup: makePopup(),
     test: (value: any) => {
         const lowercase = value.match(/[a-z]/g) || []
-        return value && lowercase && lowercase.length < count
+        return value ? lowercase && lowercase.length >= args.count : true
     }
 })
 
 export const specialCharRequiredValidator = (
-    count = 1,
-    choices = [
-        "!",
-        "@",
-        "#",
-        "$",
-        "%",
-        "^",
-        "&",
-        "*",
-        "(",
-        ")",
-        "-",
-        "_",
-        "=",
-        "+",
-        "[",
-        "]",
-        "{",
-        "}",
-        ";",
-        ":",
-        ",",
-        ".",
-        "<",
-        ">",
-        "?",
-        "/",
-        "|",
-        "~",
-        "`"
-    ]
-) => ({
+    args = {
+        fieldName: null,
+        count: 1,
+        choices: [
+            "!",
+            "@",
+            "#",
+            "$",
+            "%",
+            "^",
+            "&",
+            "*",
+            "(",
+            ")",
+            "-",
+            "_",
+            "=",
+            "+",
+            "[",
+            "]",
+            "{",
+            "}",
+            ";",
+            ":",
+            ",",
+            ".",
+            "<",
+            ">",
+            "?",
+            "/",
+            "|",
+            "~",
+            "`"
+        ]
+    }
+): IFieldValidator => ({
+    args,
     key: "specialCharRequired",
     badge: "Special Character Required",
     sticky: false,
-    message: `This field must have at least ${count} special character${
-        count > 1 ? "s" : ""
-    }, such as ${choices.join(", ")}`,
+    message: `Must have at least ${args.count} special character${
+        args.count > 1 ? "s" : ""
+    }, such as ${args.choices.join(", ")}`,
     popup: makePopup(),
-    test: (value: any) => {
-        const escaped_chars = choices.map(char => "\\" + char).join("")
+    test: (value: string) => {
+        const escaped_chars = args.choices.map(char => "\\" + char).join("")
         const regex = new RegExp("[" + escaped_chars + "]", "g")
         const specialChars = value.match(regex) || []
-        return value && specialChars && specialChars.length < count
+        return value ? specialChars && specialChars.length >= args.count : true
     }
 })
+
+export const confirmMatchValidator = (
+    args = {
+        fieldName: null,
+        getMatchValue: null as () => string
+    }
+): IFieldValidator => {
+    if (!args.getMatchValue) {
+        throw new Error(
+            "confirmMatchValidator requires a getMatchValue function"
+        )
+    }
+    return {
+        args,
+        key: "confirmMatch",
+        badge: `${
+            args.fieldName ? sentenceCase(args.fieldName) + "s" : "Values"
+        } Match`,
+        sticky: false,
+        message: `The ${
+            args.fieldName ? args.fieldName.lowercase + "s" : "values"
+        } entered does not match, please try again`,
+        popup: makePopup(),
+        test: (value: string) => {
+            const matchValue = args.getMatchValue()
+            return value ? matchValue && value === matchValue : true
+        }
+    }
+}
+
+export const completeTelephoneValidator = (
+    args = {
+        fieldName: null as string,
+        getCountryCode: null as () => string
+    }
+): IFieldValidator => {
+    if (!args.getCountryCode) {
+        throw new Error(
+            "possibleTelephoneValidator requires a getCountryCode function"
+        )
+    }
+    return {
+        args,
+        key: "completeTelephone",
+        badge: "Partial",
+        sticky: false,
+        message: "Must be a complete phone number",
+        popup: makePopup(),
+        test: (value: string) => {
+            const numOnly = value.replace(/\D/g, "")
+            const countryCode = args.getCountryCode() as CountryCode
+            const parsedNumber = parsePhoneNumber(numOnly, countryCode)
+            return value
+                ? parsedNumber &&
+                      parsedNumber.isPossible() &&
+                      parsedNumber.isValid()
+                : true
+        }
+    }
+}
+
+export const possibleTelephoneValidator = (
+    args = {
+        fieldName: null as string,
+        getCountryCode: null as () => string
+    }
+): IFieldValidator => {
+    if (!args.getCountryCode) {
+        throw new Error(
+            "possibleTelephoneValidator requires a getCountryCode function"
+        )
+    }
+    return {
+        args,
+        key: "possibleTelephone",
+        badge: "Invalid",
+        sticky: false,
+        message: "You must enter a valid phone number",
+        popup: makePopup(),
+        test: (value: string) => {
+            const numOnly = value.replace(/\D/g, "")
+            const countryCode = args.getCountryCode() as CountryCode
+            const parsedNumber = parsePhoneNumber(numOnly, countryCode)
+            console.log(value && parsedNumber && !parsedNumber.isPossible())
+            return value ? parsedNumber && parsedNumber.isPossible() : true
+        }
+    }
+}

@@ -1,12 +1,12 @@
 import {writable} from "svelte/store"
-import type {User} from "src/interfaces"
+import type {IUser} from "src/interfaces"
 
 class UserStore {
     objects: any
     currentId: any
 
     constructor() {
-        this.objects = writable<Map<string, User>>(new Map())
+        this.objects = writable<Map<string, IUser>>(new Map())
     }
 
     async get(query: any) {

@@ -1,5 +1,5 @@
 import Component from "."
-import type {EmailAddress} from "src/interfaces"
+import type {IEmailAddress} from "src/interfaces"
 import {faker} from "@faker-js/faker"
 import type {Meta} from "@storybook/svelte"
 
@@ -19,7 +19,7 @@ const Template = ({...args}) => ({
 export const Default = Template.bind({})
 
 Default.args = {
-    emailAddresses: new Map<string, EmailAddress>(),
+    emailAddresses: new Map<string, IEmailAddress>(),
     pageCount: 10
 }
 

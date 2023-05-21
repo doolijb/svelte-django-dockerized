@@ -1,4 +1,4 @@
-export interface User {
+export interface IUser {
     id: string
     username: string
     firstName?: string
@@ -8,12 +8,12 @@ export interface User {
     updated_at?: string
 }
 
-const minimalUser: User = {
+const minimalUser: IUser = {
     id: "123-456-789",
     username: "johndoe"
 }
 
-const exampleUser: User = {
+const exampleUser: IUser = {
     ...minimalUser,
     firstName: "John",
     lastName: "Doe",

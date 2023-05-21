@@ -1,6 +1,5 @@
 <script lang="ts">
     import {BaseTextInput} from "@components"
-    import type {IFieldValidator} from "@interfaces"
     import {
         requiredValidator,
         minLengthValidator,
@@ -8,19 +7,16 @@
         lowercaseRequiredValidator,
         uppercaseRequiredValidator,
         numberRequiredValidator,
-        specialCharRequiredValidator
+        specialCharRequiredValidator,
+        confirmMatchValidator
     } from "@validators"
+    import type {IFieldValidator} from "@interfaces"
 
     export let label: string = "Password"
     export let type: string = "password"
     export let validators: IFieldValidator[] = [
         requiredValidator({}),
-        minLengthValidator({minLen: 10}),
-        maxLengthValidator({maxLen: 100}),
-        lowercaseRequiredValidator({}),
-        uppercaseRequiredValidator({}),
-        numberRequiredValidator({}),
-        specialCharRequiredValidator({})
+        confirmMatchValidator({fieldName: "Password", getMatchValue})
     ]
     export let value: string = ""
     export let errors: IFieldValidator[] = []
@@ -28,6 +24,12 @@
     export let onInput: (e: Event) => void = () => {}
     export let onFocus: (e: Event) => void = () => {}
     export let onBlur: (e: Event) => void = () => {}
+
+    // Component specific
+    export let matchValue: string = ""
+    function getMatchValue(): string {
+        return matchValue
+    } // TODO
 </script>
 
 <BaseTextInput

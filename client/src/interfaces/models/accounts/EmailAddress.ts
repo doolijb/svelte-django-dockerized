@@ -1,4 +1,4 @@
-export interface EmailAddress {
+export interface IEmailAddress {
     id: string // UUID
     email: string
     isPrimary?: boolean
@@ -12,7 +12,7 @@ export interface EmailAddress {
 /**
  * Minimal EmailAddress example, i.e. viewing publicly available data
  */
-const minimal: EmailAddress = {
+const minimal: IEmailAddress = {
     id: "abc-456-789",
     email: "john.doe@example.com",
     emailable_type: "User",
@@ -25,7 +25,7 @@ const minimal: EmailAddress = {
  * Example EmailAddress, i.e. viewing publicly available data
  * with all fields filled out
  */
-const example: EmailAddress = {
+const example: IEmailAddress = {
     ...minimal,
     isPrimary: true,
     isVerified: true,

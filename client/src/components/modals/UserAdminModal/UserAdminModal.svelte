@@ -2,10 +2,10 @@
     import {AppShell, Tab, TabGroup} from "@skeletonlabs/skeleton"
     import UserAdminReview from "@components/review/UserAdminReview/UserAdminReview.svelte"
     import {ReviewModes} from "@constants"
-    import type {User} from "@interfaces"
+    import type {IUser} from "@interfaces"
 
     export let parent: any = null
-    export let user: User = null
+    export let user: IUser = null
 
     $: tabSet = 0
 

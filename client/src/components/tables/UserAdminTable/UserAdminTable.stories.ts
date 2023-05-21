@@ -1,5 +1,5 @@
 import Component from "."
-import type {User} from "src/interfaces"
+import type {IUser} from "src/interfaces"
 import {faker} from "@faker-js/faker"
 import type {Meta} from "@storybook/svelte"
 
@@ -19,7 +19,7 @@ const Template = ({...args}) => ({
 export const Default = Template.bind({})
 
 Default.args = {
-    users: new Map<string, User>(),
+    users: new Map<string, IUser>(),
     pageCount: 10
 }
 

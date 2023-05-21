@@ -1,11 +1,11 @@
 <script lang="ts">
-    import type {User} from "@interfaces"
+    import type {IUser} from "@interfaces"
     import {ReviewModes} from "@constants"
     import {onMount} from "svelte"
 
     export let mode: string = ReviewModes.CREATE
     console.log("mode", mode)
-    export let user: User | undefined | null = null
+    export let user: IUser | undefined | null = null
 
     export let formData = {
         user: {

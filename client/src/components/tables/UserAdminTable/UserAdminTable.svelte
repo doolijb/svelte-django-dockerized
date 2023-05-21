@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {User} from "src/interfaces/index"
+    import type {IUser} from "src/interfaces/index"
     import {
         BoolCell,
         TextCell,
@@ -14,7 +14,7 @@
         tableMapperValues
     } from "@skeletonlabs/skeleton"
 
-    export let users = new Map<string, User>()
+    export let users = new Map<string, IUser>()
 
     export let pageCount = 0
 
