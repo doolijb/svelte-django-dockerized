@@ -36,13 +36,13 @@
         <span>Username</span>
         {#if mode === ReviewModes.CREATE || mode === ReviewModes.EDIT}
             <input
-                class="input variant-form-material"
+                class="variant-form-material input"
                 class:input-error={invalidFields.includes("username")}
                 type="text"
                 bind:value={formData.user.username}
             />
         {:else if mode === ReviewModes.VIEW && user}
-            <div class="input variant-form-material">
+            <div class="variant-form-material input">
                 {user.username}
             </div>
         {/if}
@@ -55,7 +55,7 @@
         <span>Email Address</span>
         <input
             bind:value={formData.user.email}
-            class="input variant-form-material"
+            class="variant-form-material input"
             class:input-error={invalidFields.includes("email")}
             type="email"
         />
@@ -67,7 +67,7 @@
         <span>Password</span>
         <input
             bind:value={formData.user.email}
-            class="input variant-form-material"
+            class="variant-form-material input"
             class:input-error={invalidFields.includes("email")}
             type="email"
         />

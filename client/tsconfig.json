@@ -46,7 +46,8 @@
         "src/**/*.d.ts",
         "src/**/*.ts",
         "src/**/*.js",
-        "src/**/*.svelte"
+        "src/**/*.svelte",
+        "src/components/fields/ValidationLegend"
     ],
     "references": [
         {

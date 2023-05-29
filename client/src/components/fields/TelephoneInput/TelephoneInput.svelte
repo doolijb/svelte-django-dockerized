@@ -7,7 +7,7 @@
     } from "@validators"
     import type {IFieldValidator} from "@interfaces"
     import {CountryCodes} from "@constants"
-    import {AsYouType} from "libphonenumber-js"
+    import {AsYouType, format} from "libphonenumber-js"
 
     export let label: string = "Telephone"
     export let type: string = "tel"
@@ -20,14 +20,17 @@
 
     // Component specific
     let ref: HTMLInputElement
-    let selectedCountry = CountryCodes.US.code
+    export let country = CountryCodes.US.code
 
-    function formatInput(e: InputEvent) {
+    function formatInput(e?: InputEvent | FocusEvent) {
         // Return if no country is selected or if the input is empty, or if backspace is pressed
         if (
-            !selectedCountry ||
+            !country ||
             !value ||
-            e.inputType === "deleteContentBackward"
+            e === undefined ||
+            e.type === "focus" ||
+            (e.type === "input" &&
+                (e as InputEvent).inputType === "deleteContentBackward")
         )
             return
         // Format the input
@@ -35,14 +38,11 @@
         // Remove all non-numeric characters
         draftValue = draftValue.replace(/\D/g, "")
         // Remove the dial code from the input if it exists
-        if (draftValue.startsWith(CountryCodes[selectedCountry].dialCode)) {
-            draftValue = draftValue.replace(
-                CountryCodes[selectedCountry].dialCode,
-                ""
-            )
+        if (draftValue.startsWith(CountryCodes[country].dialCode)) {
+            draftValue = draftValue.replace(CountryCodes[country].dialCode, "")
         }
         // Format the input
-        const formatter = new AsYouType(selectedCountry as any)
+        const formatter = new AsYouType(country as any)
         const formattedInput = formatter.input(draftValue)
         // Set the value of the input to the formatted input
         value = formattedInput
@@ -51,9 +51,11 @@
     // Validators (OOP)
     export let validators: IFieldValidator[] = [
         maxLengthValidator({maxLen: 15}),
-        completeTelephoneValidator({countryCode: selectedCountry}),
-        possibleTelephoneValidator({countryCode: selectedCountry})
+        completeTelephoneValidator({getCountryCode: () => country}),
+        possibleTelephoneValidator({getCountryCode: () => country})
     ]
+
+    formatInput()
 </script>
 
 <BaseTextInput
@@ -68,7 +70,10 @@
         onFocus(e)
         ref.select()
     }}
-    {onBlur}
+    onBlur={e => {
+        formatInput(e)
+        onBlur(e)
+    }}
     onInput={e => {
         formatInput(e)
         onInput(e)
@@ -76,24 +81,22 @@
 >
     <div slot="prefix" class="no-padding">
         <select
-            bind:value={selectedCountry}
+            bind:value={country}
             class="cursor-pointer"
             on:change={() => ref.focus()}
-            title={selectedCountry
-                ? CountryCodes[selectedCountry].name
-                : "Select a country"}
+            title={country ? CountryCodes[country].name : "Select a country"}
         >
             {#each Object.values(CountryCodes) as country}
                 <option
                     value={country.code}
-                    selected={country.code === selectedCountry}
+                    selected={country.code === country}
                     title={country.name}>{country.code}</option
                 >
             {/each}
         </select>
         <span class="muted select-none">
-            {CountryCodes[selectedCountry].dialCode
-                ? `+${CountryCodes[selectedCountry].dialCode}`
+            {CountryCodes[country].dialCode
+                ? `+${CountryCodes[country].dialCode}`
                 : ""}
         </span>
     </div>

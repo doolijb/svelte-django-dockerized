@@ -16,7 +16,7 @@ const meta: Meta<typeof Component> = {
         label: {
             type: {
                 name: "string",
-                required: true
+                required: false
             }
         },
         type: {

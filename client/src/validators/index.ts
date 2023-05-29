@@ -9,11 +9,11 @@ import type {IFieldValidator} from "@interfaces"
 export const makePopup: () => PopupSettings = () => ({
     event: "hover",
     target: uuidv4(),
-    placement: "top"
+    placement: "bottom"
 })
 
 export const requiredValidator = (
-    args = {fieldName: null as string}
+    args: {label?: string} = {}
 ): IFieldValidator => ({
     args,
     key: "required",
@@ -26,7 +26,7 @@ export const requiredValidator = (
 })
 
 export const minLengthValidator = (
-    args = {fieldName: null as string, minLen: 3}
+    args: {label?: string; minLen: number} = {minLen: 3}
 ): IFieldValidator => ({
     args,
     key: "minLength",
@@ -38,7 +38,7 @@ export const minLengthValidator = (
 })
 
 export const maxLengthValidator = (
-    args = {fieldName: null as string, maxLen: 20}
+    args: {label?: string; maxLen: number} = {maxLen: 20}
 ): IFieldValidator => ({
     args,
     key: "maxLength",
@@ -50,7 +50,7 @@ export const maxLengthValidator = (
 })
 
 export const specialCharValidator = (
-    args = {fieldName: null as string}
+    args: {label?: string} = {}
 ): IFieldValidator => ({
     args,
     key: "specialChar",
@@ -62,7 +62,7 @@ export const specialCharValidator = (
 })
 
 export const emailValidator = (
-    args = {fieldName: null as string}
+    args: {label?: string} = {}
 ): IFieldValidator => ({
     args,
     key: "email",
@@ -75,7 +75,7 @@ export const emailValidator = (
 })
 
 export const numberRequiredValidator = (
-    args = {fieldName: null as string, count: 1}
+    args: {label?: string; count: number} = {count: 1}
 ): IFieldValidator => ({
     args,
     key: "numberRequired",
@@ -92,7 +92,7 @@ export const numberRequiredValidator = (
 })
 
 export const uppercaseRequiredValidator = (
-    args = {fieldName: null as string, count: 1}
+    args: {label?: string; count: number} = {count: 1}
 ): IFieldValidator => ({
     args,
     key: "uppercaseRequired",
@@ -109,7 +109,7 @@ export const uppercaseRequiredValidator = (
 })
 
 export const lowercaseRequiredValidator = (
-    args = {fieldName: null as string, count: 1}
+    args: {label?: string; count: number} = {count: 1}
 ): IFieldValidator => ({
     args,
     key: "lowercaseRequired",
@@ -126,8 +126,7 @@ export const lowercaseRequiredValidator = (
 })
 
 export const specialCharRequiredValidator = (
-    args = {
-        fieldName: null,
+    args: {label?: string; count: number; choices: string[]} = {
         count: 1,
         choices: [
             "!",
@@ -179,8 +178,7 @@ export const specialCharRequiredValidator = (
 })
 
 export const confirmMatchValidator = (
-    args = {
-        fieldName: null,
+    args: {label?: string; getMatchValue: () => string} = {
         getMatchValue: null as () => string
     }
 ): IFieldValidator => {
@@ -193,11 +191,11 @@ export const confirmMatchValidator = (
         args,
         key: "confirmMatch",
         badge: `${
-            args.fieldName ? sentenceCase(args.fieldName) + "s" : "Values"
+            args.label ? sentenceCase(args.label) + "s" : "Values"
         } Match`,
         sticky: false,
         message: `The ${
-            args.fieldName ? args.fieldName.lowercase + "s" : "values"
+            args.label ? args.label.lowercase + "s" : "values"
         } entered does not match, please try again`,
         popup: makePopup(),
         test: (value: string) => {
@@ -208,8 +206,7 @@ export const confirmMatchValidator = (
 }
 
 export const completeTelephoneValidator = (
-    args = {
-        fieldName: null as string,
+    args: {label?: string; getCountryCode: () => string} = {
         getCountryCode: null as () => string
     }
 ): IFieldValidator => {
@@ -221,7 +218,7 @@ export const completeTelephoneValidator = (
     return {
         args,
         key: "completeTelephone",
-        badge: "Partial",
+        badge: "Invalid",
         sticky: false,
         message: "Must be a complete phone number",
         popup: makePopup(),
@@ -229,21 +226,17 @@ export const completeTelephoneValidator = (
             const numOnly = value.replace(/\D/g, "")
             const countryCode = args.getCountryCode() as CountryCode
             const parsedNumber = parsePhoneNumber(numOnly, countryCode)
-            return value
-                ? parsedNumber &&
-                      parsedNumber.isPossible() &&
-                      parsedNumber.isValid()
+            return value && parsedNumber.isPossible()
+                ? parsedNumber && parsedNumber.isValid()
                 : true
         }
     }
 }
 
-export const possibleTelephoneValidator = (
-    args = {
-        fieldName: null as string,
-        getCountryCode: null as () => string
-    }
-): IFieldValidator => {
+export const possibleTelephoneValidator = (args: {
+    label?: string
+    getCountryCode: () => string
+}): IFieldValidator => {
     if (!args.getCountryCode) {
         throw new Error(
             "possibleTelephoneValidator requires a getCountryCode function"
@@ -252,7 +245,7 @@ export const possibleTelephoneValidator = (
     return {
         args,
         key: "possibleTelephone",
-        badge: "Invalid",
+        badge: "Partial",
         sticky: false,
         message: "You must enter a valid phone number",
         popup: makePopup(),

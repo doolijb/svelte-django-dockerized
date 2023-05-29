@@ -12,7 +12,7 @@
     <div class="flex items-center items-stretch justify-center pt-2">
         <button
             type="button"
-            class="btn-icon btn-icon-sm variant-soft-error"
+            class="variant-soft-error btn-icon btn-icon-sm"
             {disabled}
             on:click={onClick}
             on:focus={() => (focused = true)}

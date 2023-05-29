@@ -3,10 +3,25 @@ import Component from "."
 import type {ComponentType} from "svelte"
 import baseTextInputMeta from "@components/fields/BaseTextInput/BaseTextInput.stories"
 import {faker} from "@faker-js/faker"
+// get country codes from phone number lib
+import {CountryCodes} from "@constants"
 
 const meta: Meta<typeof Component> = {
     ...baseTextInputMeta,
-    component: Component as ComponentType
+    component: Component as ComponentType,
+    argTypes: {
+        ...baseTextInputMeta.argTypes,
+        country: {
+            type: {
+                name: "string",
+                required: false
+            },
+            control: {
+                type: "select",
+                options: Object.keys(CountryCodes)
+            }
+        }
+    } as any
 }
 
 export default meta
@@ -24,6 +39,6 @@ export const Empty = {
 export const Filled = {
     render: Template,
     args: {
-        value: faker.internet.userName()
+        value: faker.phone.number("##########")
     }
 }

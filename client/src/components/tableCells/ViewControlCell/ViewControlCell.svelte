@@ -12,7 +12,7 @@
     <div class="flex items-center items-stretch justify-center py-2">
         <button
             type="button"
-            class="btn-icon btn-icon-sm variant-soft-primary"
+            class="variant-soft-primary btn-icon btn-icon-sm"
             {disabled}
             on:click={onClick}
             on:focus={() => (focused = true)}
