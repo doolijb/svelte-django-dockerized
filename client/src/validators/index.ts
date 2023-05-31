@@ -21,8 +21,7 @@ export const requiredValidator = (
     sticky: true,
     message: "This field is required",
     popup: makePopup(),
-    test: (value: string) =>
-        !!value || value === undefined || value === null || value === ""
+    test: (value: string) => !!value
 })
 
 export const minLengthValidator = (

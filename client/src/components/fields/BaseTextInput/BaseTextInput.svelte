@@ -4,7 +4,6 @@
     import {ValidStates} from "@constants"
     import type {IFieldValidator} from "@interfaces"
     import {ValidationBadges, ValidationLegend} from "@components"
-    import {v4 as uuidv4} from "uuid"
 
     /**
      * Exported Props
@@ -37,14 +36,7 @@
     /**
      * Constants
      */
-    const legendPopup: PopupSettings = {
-        // Represents the type of event that opens/closed the popup
-        event: "click",
-        // Matches the data-popup value on your popup element
-        target: uuidv4(),
-        // Defines which side of your trigger the popup will appear
-        placement: "bottom"
-    }
+    const legendPopup: PopupSettings = ValidationLegend.makePopupSettings()
 
     /**
      * Functions
@@ -86,7 +78,7 @@
 
 <label class="label">
     <span>
-        <span class="cursor-pointer select-none">
+        <span class="cursor-pointer select-none" class:text-gray-500={disabled}>
             {label}
         </span>
         <ValidationBadges {validators} {errors} />
@@ -120,14 +112,12 @@
             aria-label={label}
             {required}
         />
-        <div>
-            <ValidationLegend.Icon
-                {validators}
-                {errors}
-                {validState}
-                {legendPopup}
-            />
-        </div>
+        <ValidationLegend.Icon
+            {validators}
+            {errors}
+            {validState}
+            {legendPopup}
+        />
     </div>
     <ValidationLegend.Popup {validators} {errors} {validState} {legendPopup} />
 </label>

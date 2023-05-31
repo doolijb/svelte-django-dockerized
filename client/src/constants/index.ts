@@ -1,4 +1,5 @@
 export * from "./CountryCodes"
+export * from "./RegionCodes"
 
 /**
  * Enum for Review Component mode

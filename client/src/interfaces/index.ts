@@ -11,3 +11,18 @@ export interface IFieldValidator {
     popup: PopupSettings
     test: (value: any) => boolean
 }
+
+export interface ICountryCode {
+    readonly name: string
+    readonly code: string
+    readonly dialCode: string
+    readonly keywords: string[]
+    readonly getRegionCodes: () => Map<string, IRegionCode>
+}
+
+export interface IRegionCode {
+    readonly name: string
+    readonly code: string
+    readonly keywords: string[]
+    readonly getCountryCode: () => ICountryCode
+}
