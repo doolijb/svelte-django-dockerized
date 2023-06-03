@@ -32,3 +32,10 @@ export const WithValue = {
         value: "US"
     }
 }
+
+export const Disabled = {
+    render: Template,
+    args: {
+        disabled: true
+    }
+}

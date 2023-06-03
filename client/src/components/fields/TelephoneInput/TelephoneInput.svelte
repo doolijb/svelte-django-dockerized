@@ -1,4 +1,5 @@
 <script lang="ts">
+    import {onMount} from "svelte"
     import {BaseTextInput} from "@components"
     import {
         maxLengthValidator,
@@ -6,8 +7,8 @@
         possibleTelephoneValidator
     } from "@validators"
     import type {IFieldValidator} from "@interfaces"
-    import {CountryCodes} from "@constants"
-    import {AsYouType, format} from "libphonenumber-js"
+    import {countries} from "@constants"
+    import {AsYouType} from "libphonenumber-js"
 
     export let label: string = "Telephone"
     export let type: string = "tel"
@@ -20,7 +21,8 @@
 
     // Component specific
     let ref: HTMLInputElement
-    export let country = CountryCodes.US.code
+    export let readonlyCountry: boolean = false
+    export let country = countries['US'].code
 
     function formatInput(e?: InputEvent | FocusEvent) {
         // Return if no country is selected or if the input is empty, or if backspace is pressed
@@ -38,8 +40,8 @@
         // Remove all non-numeric characters
         draftValue = draftValue.replace(/\D/g, "")
         // Remove the dial code from the input if it exists
-        if (draftValue.startsWith(CountryCodes[country].dialCode)) {
-            draftValue = draftValue.replace(CountryCodes[country].dialCode, "")
+        if (draftValue.startsWith(countries[country].dialCode)) {
+            draftValue = draftValue.replace(countries[country].dialCode, "")
         }
         // Format the input
         const formatter = new AsYouType(country as any)
@@ -48,6 +50,8 @@
         value = formattedInput
     }
 
+    $: value ? formatInput() : null
+
     // Validators (OOP)
     export let validators: IFieldValidator[] = [
         maxLengthValidator({maxLen: 15}),
@@ -55,7 +59,6 @@
         possibleTelephoneValidator({getCountryCode: () => country})
     ]
 
-    formatInput()
 </script>
 
 <BaseTextInput
@@ -80,13 +83,18 @@
     }}
 >
     <div slot="prefix" class="no-padding">
+        {#if readonlyCountry || disabled}
+        <span class="cursor-pointer px-3 muted" title={countries[country].name}>
+            {country}
+        </span>
+        {:else}
         <select
             bind:value={country}
             class="cursor-pointer"
             on:change={() => ref.focus()}
-            title={country ? CountryCodes[country].name : "Select a country"}
+            title={country ? countries[country].name : "Select a country"}
         >
-            {#each Object.values(CountryCodes) as country}
+            {#each Object.values(countries) as country}
                 <option
                     value={country.code}
                     selected={country.code === country}
@@ -94,9 +102,10 @@
                 >
             {/each}
         </select>
-        <span class="muted select-none">
-            {CountryCodes[country].dialCode
-                ? `+${CountryCodes[country].dialCode}`
+        {/if}
+        <span class="muted cursor-pointer">
+            {countries[country].dialCode
+                ? `+${countries[country].dialCode}`
                 : ""}
         </span>
     </div>

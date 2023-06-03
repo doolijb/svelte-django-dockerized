@@ -131,17 +131,19 @@
 
 <label class="label">
     <span>
-        <span class="cursor-pointer select-none">
+        <span class="cursor-pointer select-none" class:text-gray-500={disabled}>
             {label}
         </span>
-        <ValidationBadges {validators} {errors} />
+        {#if !disabled}
+            <ValidationBadges {validators} {errors} />
+        {/if}
     </span>
     <div
         class="input-group"
         class:grid-cols-[auto_1fr_auto]={$$slots.prefix && validators.length}
         class:grid-cols-[1fr_auto]={!$$slots.prefix && validators.length}
         class:grid-cols-[auto_1fr]={$$slots.prefix && !validators.length}
-        class:grid-cols-[1fr]={!$$slots.prefix && !validators.length}
+        class:grid-cols-[1fr]={!$$slots.prefix && !validators.length && !disabled}
     >
         <slot name="prefix" />
         <input
@@ -159,15 +161,18 @@
                 onBlur(e)
             }}
             on:focus={onFocus}
+            {disabled}
         />
-        <ValidationLegend.Icon
-            {validators}
-            {errors}
-            {validState}
-            {legendPopup}
-        />
+        {#if !disabled}
+            <ValidationLegend.Icon
+                {validators}
+                {errors}
+                {validState}
+                {legendPopup}
+            />
+        {/if}
     </div>
-    <div data-popup={popupSettings.target} class="card z-10 p-3 shadow-xl">
+    <div data-popup={popupSettings.target} class="card z-10 p-3 shadow-xl max-h-[75vh] overflow-y-scroll">
         <span class="h3 mb-3 select-none"> Choose an option </span>
         <Autocomplete
             bind:input={searchInput}
@@ -191,7 +196,9 @@
             </div>
         {/if}
     </div>
-    <ValidationLegend.Popup {validators} {errors} {validState} {legendPopup} />
+    {#if !disabled}
+        <ValidationLegend.Popup {validators} {errors} {validState} {legendPopup} />
+    {/if}
 </label>
 
 <style lang="postcss">

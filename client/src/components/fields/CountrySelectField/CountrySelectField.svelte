@@ -1,9 +1,8 @@
 <script lang="ts">
     import {BaseSearchSelectField} from "@components"
     import type {AutocompleteOption} from "@skeletonlabs/skeleton"
-    import type {IFieldValidator, ICountryCode} from "@interfaces"
-    import {CountryCodes} from "@constants"
-    import {onMount} from "svelte"
+    import type {IFieldValidator, ICountry} from "@interfaces"
+    import {countries} from "@constants"
     import {requiredValidator} from "@validators"
 
     export let label: string = "Country"
@@ -17,19 +16,21 @@
     export let onFocus: (e: Event) => void = () => {}
     export let onBlur: (e: Event) => void = () => {}
     // Refs
-    export let ref: HTMLSelectElement
+    export let ref: HTMLInputElement
 
     /**
      * Variables
      */
 
-    const options: AutocompleteOption[] = Array.from(CountryCodes.values()).map(
-        (countryCode: ICountryCode) => ({
-            label: countryCode.name,
-            value: countryCode.code,
-            keywords: countryCode.keywords
+    const options: AutocompleteOption[] = Object.values(countries).map(
+        (country: ICountry) => ({
+            label: country.name,
+            value: country.code,
+            keywords: country.keywords
         })
     )
+
+    console.log(countries)
 
     /**
      * Lifecycle

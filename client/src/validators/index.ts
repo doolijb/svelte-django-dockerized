@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type {PopupSettings} from "@skeletonlabs/skeleton"
-import {get} from "svelte/store"
-import {v4 as uuidv4} from "uuid"
-import {sentenceCase} from "change-case"
-import parsePhoneNumber, {type CountryCode} from "libphonenumber-js"
-import type {IFieldValidator} from "@interfaces"
+import type { PopupSettings } from "@skeletonlabs/skeleton"
+import { v4 as uuidv4 } from "uuid"
+import { sentenceCase } from "change-case"
+import parsePhoneNumber, { getCountryCallingCode, type CountryCode } from "libphonenumber-js"
+import type { IFieldValidator } from "@interfaces"
+import postalCodes from "postal-codes-js"
 
 export const makePopup: () => PopupSettings = () => ({
     event: "hover",
@@ -13,7 +13,7 @@ export const makePopup: () => PopupSettings = () => ({
 })
 
 export const requiredValidator = (
-    args: {label?: string} = {}
+    args: { label?: string } = {}
 ): IFieldValidator => ({
     args,
     key: "required",
@@ -25,7 +25,7 @@ export const requiredValidator = (
 })
 
 export const minLengthValidator = (
-    args: {label?: string; minLen: number} = {minLen: 3}
+    args: { label?: string; minLen: number } = { minLen: 3 }
 ): IFieldValidator => ({
     args,
     key: "minLength",
@@ -37,7 +37,7 @@ export const minLengthValidator = (
 })
 
 export const maxLengthValidator = (
-    args: {label?: string; maxLen: number} = {maxLen: 20}
+    args: { label?: string; maxLen: number } = { maxLen: 20 }
 ): IFieldValidator => ({
     args,
     key: "maxLength",
@@ -49,7 +49,7 @@ export const maxLengthValidator = (
 })
 
 export const specialCharValidator = (
-    args: {label?: string} = {}
+    args: { label?: string } = {}
 ): IFieldValidator => ({
     args,
     key: "specialChar",
@@ -61,7 +61,7 @@ export const specialCharValidator = (
 })
 
 export const emailValidator = (
-    args: {label?: string} = {}
+    args: { label?: string } = {}
 ): IFieldValidator => ({
     args,
     key: "email",
@@ -74,14 +74,13 @@ export const emailValidator = (
 })
 
 export const numberRequiredValidator = (
-    args: {label?: string; count: number} = {count: 1}
+    args: { label?: string; count: number } = { count: 1 }
 ): IFieldValidator => ({
     args,
     key: "numberRequired",
     badge: "Number Required",
     sticky: false,
-    message: `Must have at least ${args.count} number${
-        args.count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} number${args.count > 1 ? "s" : ""
     }`,
     popup: makePopup(),
     test: (value: string) => {
@@ -91,14 +90,13 @@ export const numberRequiredValidator = (
 })
 
 export const uppercaseRequiredValidator = (
-    args: {label?: string; count: number} = {count: 1}
+    args: { label?: string; count: number } = { count: 1 }
 ): IFieldValidator => ({
     args,
     key: "uppercaseRequired",
     badge: "Uppercase Required",
     sticky: false,
-    message: `Must have at least ${args.count} uppercase letter${
-        args.count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} uppercase letter${args.count > 1 ? "s" : ""
     }`,
     popup: makePopup(),
     test: (value: any) => {
@@ -108,14 +106,13 @@ export const uppercaseRequiredValidator = (
 })
 
 export const lowercaseRequiredValidator = (
-    args: {label?: string; count: number} = {count: 1}
+    args: { label?: string; count: number } = { count: 1 }
 ): IFieldValidator => ({
     args,
     key: "lowercaseRequired",
     badge: "Lowercase Required",
     sticky: false,
-    message: `Must have at least ${args.count} lowercase letter${
-        args.count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} lowercase letter${args.count > 1 ? "s" : ""
     }`,
     popup: makePopup(),
     test: (value: any) => {
@@ -125,7 +122,7 @@ export const lowercaseRequiredValidator = (
 })
 
 export const specialCharRequiredValidator = (
-    args: {label?: string; count: number; choices: string[]} = {
+    args: { label?: string; count: number; choices: string[] } = {
         count: 1,
         choices: [
             "!",
@@ -164,8 +161,7 @@ export const specialCharRequiredValidator = (
     key: "specialCharRequired",
     badge: "Special Character Required",
     sticky: false,
-    message: `Must have at least ${args.count} special character${
-        args.count > 1 ? "s" : ""
+    message: `Must have at least ${args.count} special character${args.count > 1 ? "s" : ""
     }, such as ${args.choices.join(", ")}`,
     popup: makePopup(),
     test: (value: string) => {
@@ -177,7 +173,7 @@ export const specialCharRequiredValidator = (
 })
 
 export const confirmMatchValidator = (
-    args: {label?: string; getMatchValue: () => string} = {
+    args: { label?: string; getMatchValue: () => string } = {
         getMatchValue: null as () => string
     }
 ): IFieldValidator => {
@@ -189,12 +185,10 @@ export const confirmMatchValidator = (
     return {
         args,
         key: "confirmMatch",
-        badge: `${
-            args.label ? sentenceCase(args.label) + "s" : "Values"
+        badge: `${args.label ? sentenceCase(args.label) + "s" : "Values"
         } Match`,
         sticky: false,
-        message: `The ${
-            args.label ? args.label.lowercase + "s" : "values"
+        message: `The ${args.label ? args.label.lowercase + "s" : "values"
         } entered does not match, please try again`,
         popup: makePopup(),
         test: (value: string) => {
@@ -205,7 +199,7 @@ export const confirmMatchValidator = (
 }
 
 export const completeTelephoneValidator = (
-    args: {label?: string; getCountryCode: () => string} = {
+    args: { label?: string; getCountryCode: () => string } = {
         getCountryCode: null as () => string
     }
 ): IFieldValidator => {
@@ -255,5 +249,24 @@ export const possibleTelephoneValidator = (args: {
             console.log(value && parsedNumber && !parsedNumber.isPossible())
             return value ? parsedNumber && parsedNumber.isPossible() : true
         }
+    }
+}
+
+export const postalCodeValidator = (args: { getCountryCode: () => string | null }): IFieldValidator => {
+    return {
+        args,
+        key: "postalCode",
+        badge: "Format",
+        sticky: false,
+        message: "Must be a valid postal code",
+        popup: makePopup(),
+        test: (value: string): boolean => {
+            const countryCode = args.getCountryCode()
+            // We will only test if the country code is valid
+            if (!countryCode) {
+                return true
+            }
+            return postalCodes.validate(countryCode, value) === true
+        },
     }
 }

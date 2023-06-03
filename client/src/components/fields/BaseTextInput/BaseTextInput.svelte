@@ -81,15 +81,17 @@
         <span class="cursor-pointer select-none" class:text-gray-500={disabled}>
             {label}
         </span>
-        <ValidationBadges {validators} {errors} />
+        {#if !disabled}
+            <ValidationBadges {validators} {errors} />
+        {/if}
     </span>
 
     <div
         class="input-group"
         class:grid-cols-[auto_1fr_auto]={$$slots.prefix && validators.length}
         class:grid-cols-[1fr_auto]={!$$slots.prefix && validators.length}
-        class:grid-cols-[auto_1fr]={$$slots.prefix && !validators.length}
-        class:grid-cols-[1fr]={!$$slots.prefix && !validators.length}
+        class:grid-cols-[auto_1fr]={$$slots.prefix && !validators.length && !disabled}
+        class:grid-cols-[1fr]={!$$slots.prefix && !validators.length && !disabled}
     >
         <slot name="prefix" />
         <input
@@ -112,14 +114,18 @@
             aria-label={label}
             {required}
         />
-        <ValidationLegend.Icon
-            {validators}
-            {errors}
-            {validState}
-            {legendPopup}
-        />
+        {#if !disabled}
+            <ValidationLegend.Icon
+                {validators}
+                {errors}
+                {validState}
+                {legendPopup}
+            />
+        {/if}
     </div>
-    <ValidationLegend.Popup {validators} {errors} {validState} {legendPopup} />
+    {#if !disabled}
+        <ValidationLegend.Popup {validators} {errors} {validState} {legendPopup} />
+    {/if}
 </label>
 
 <style lang="postcss">

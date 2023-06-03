@@ -76,3 +76,11 @@ export const WithValue = {
         value: "Value 2"
     }
 }
+
+export const Disabled = {
+    render: Template,
+    args: {
+        ...WithValidators.args,
+        disabled: true
+    }
+}

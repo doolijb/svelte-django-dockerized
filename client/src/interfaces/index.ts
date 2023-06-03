@@ -1,4 +1,4 @@
-import type {PopupSettings} from "@skeletonlabs/skeleton"
+import type { PopupSettings } from "@skeletonlabs/skeleton"
 
 export * from "./models"
 
@@ -12,17 +12,19 @@ export interface IFieldValidator {
     test: (value: any) => boolean
 }
 
-export interface ICountryCode {
+export interface ICountry {
     readonly name: string
     readonly code: string
     readonly dialCode: string
     readonly keywords: string[]
-    readonly getRegionCodes: () => Map<string, IRegionCode>
+    readonly regionTitle?: string
+    readonly postalCodeTitle?: string
+    readonly getRegions: () => Map<string, IRegion>
 }
 
-export interface IRegionCode {
+export interface IRegion {
     readonly name: string
     readonly code: string
     readonly keywords: string[]
-    readonly getCountryCode: () => ICountryCode
+    readonly getCountry: () => ICountry
 }
