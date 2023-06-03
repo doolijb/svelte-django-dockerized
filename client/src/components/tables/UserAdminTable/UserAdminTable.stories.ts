@@ -1,7 +1,8 @@
 import Component from "."
-import type {IUser} from "src/interfaces"
 import {faker} from "@faker-js/faker"
 import type {Meta} from "@storybook/svelte"
+import type {IUser} from "src/interfaces"
+
 
 const meta: Meta<typeof Component> = {
     component: Component as any,

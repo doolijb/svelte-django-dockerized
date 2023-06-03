@@ -1,7 +1,8 @@
-import type {PopupSettings} from "@skeletonlabs/skeleton/index"
+
 import {default as Icon} from "./Icon.svelte"
 import {default as Popup} from "./Popup.svelte"
 import {v4 as uuidv4} from "uuid"
+import type {PopupSettings} from "@skeletonlabs/skeleton/index"
 
 function makePopupSettings(): PopupSettings {
     return {

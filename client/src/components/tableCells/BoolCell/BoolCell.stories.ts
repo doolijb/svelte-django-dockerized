@@ -2,6 +2,7 @@ import Component from "."
 import {TableDataDecorator} from "@decorators"
 import type {Meta} from "@storybook/svelte"
 
+
 const meta: Meta<typeof Component> = {
     // Automatically generate the component name as "Table cells/BoolCell"
 
@@ -34,13 +35,6 @@ const Template = (args: {value: boolean}) => ({
     props: args
 })
 
-export const True = {
-    render: Template,
-    args: {
-        value: true
-    }
-}
-
 export const False = {
     render: Template,
     args: {
@@ -52,5 +46,12 @@ export const Null = {
     render: Template,
     args: {
         value: null
+    }
+}
+
+export const True = {
+    render: Template,
+    args: {
+        value: true
     }
 }

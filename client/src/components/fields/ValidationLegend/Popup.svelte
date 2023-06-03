@@ -3,10 +3,10 @@
     import type {IFieldValidator} from "@interfaces"
     import type {PopupSettings} from "@skeletonlabs/skeleton"
 
-    export let validators: IFieldValidator[] = []
     export let errors: IFieldValidator[] = []
-    export let validState = ValidStates.NONE
     export let legendPopup: PopupSettings
+    export let validState = ValidStates.NONE
+    export let validators: IFieldValidator[] = []
 </script>
 
 {#if validators.length}

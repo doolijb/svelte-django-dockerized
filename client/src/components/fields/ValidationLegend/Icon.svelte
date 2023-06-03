@@ -1,14 +1,14 @@
 <script lang="ts">
     import {ValidStates} from "@constants"
     import Icon from "@iconify/svelte"
-    import type {IFieldValidator} from "@interfaces"
     import {popup, type PopupSettings} from "@skeletonlabs/skeleton"
     import {onMount} from "svelte"
+    import type {IFieldValidator} from "@interfaces"
 
-    export let validators: IFieldValidator[] = []
     export let errors: IFieldValidator[] = []
-    export let validState = ValidStates.NONE
     export let legendPopup: PopupSettings
+    export let validState = ValidStates.NONE
+    export let validators: IFieldValidator[] = []
     let legendIcon: HTMLDivElement
 
     onMount(() => {
@@ -21,7 +21,7 @@
 </script>
 
 {#if validators.length}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-click-events-have-key-events The event is required for event behavior to work as intended -->
     <!-- We need to execute the attached event, and prevent popagating up on click -->
     <div
         class="input-group-icon cursor-pointer"

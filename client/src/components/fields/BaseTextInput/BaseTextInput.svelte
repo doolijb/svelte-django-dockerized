@@ -1,26 +1,33 @@
 <script lang="ts">
-    import {onMount} from "svelte"
-    import type {PopupSettings} from "@skeletonlabs/skeleton"
-    import {ValidStates} from "@constants"
-    import type {IFieldValidator} from "@interfaces"
     import {ValidationBadges, ValidationLegend} from "@components"
+    import {ValidStates} from "@constants"
+    import {onMount} from "svelte"
+    import type {IFieldValidator} from "@interfaces"
+    import type {PopupSettings} from "@skeletonlabs/skeleton"
 
-    /**
-     * Exported Props
-     */
-    export let label: string = "Field Label"
-    export let type: string = "text"
-    export let placeholder: string = ""
-    export let validators: IFieldValidator[] = []
+
+    export let disabled = false
     export let errors: IFieldValidator[] = []
-    export let value: string = ""
-    export let disabled: boolean = false
+    export let label = "Field Label"
+    export let onBlur: (e: Event) => void | undefined
+    export let onFocus: (e: Event) => void | undefined
     // Events
-    export let onInput: (e: Event) => void = () => {}
-    export let onFocus: (e: Event) => void = () => {}
-    export let onBlur: (e: Event) => void = () => {}
+    export let onInput: (e: Event) => void | undefined
+
+    export let placeholder = ""
+
+
     // Refs
     export let ref: HTMLInputElement
+
+
+
+    export let type = "text"
+
+
+    export let validators: IFieldValidator[] = []
+
+    export let value = ""
 
     /**
      * Variables
@@ -62,15 +69,15 @@
         }
         validators.forEach(validator => {
             switch (validator.key) {
-                case "required":
-                    required = true
-                    break
-                case "maxLength":
-                    ref.maxLength = validator.args["maxLen"]
-                    break
-                case "minLength":
-                    ref.minLength = validator.args["minLen"]
-                    break
+            case "required":
+                required = true
+                break
+            case "maxLength":
+                ref.maxLength = validator.args["maxLen"]
+                break
+            case "minLength":
+                ref.minLength = validator.args["minLen"]
+                break
             }
         })
     })
@@ -99,7 +106,7 @@
             use:setType
             bind:value
             bind:this={ref}
-            {placeholder}
+            placeholder={!disabled ? placeholder : ""}
             {disabled}
             on:input={e => {
                 isTouched = true

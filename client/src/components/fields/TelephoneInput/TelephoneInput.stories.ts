@@ -1,10 +1,11 @@
-import type { Meta } from "@storybook/svelte"
 import Component from "."
-import type { ComponentType } from "svelte"
 import baseTextInputMeta from "@components/fields/BaseTextInput/BaseTextInput.stories"
-import { faker } from "@faker-js/faker"
 // get country codes from phone number lib
-import { countries } from "@constants"
+import { countries } from "@data"
+import { faker } from "@faker-js/faker"
+import type { Meta } from "@storybook/svelte"
+import type { ComponentType } from "svelte"
+
 
 const meta: Meta<typeof Component> = {
     ...baseTextInputMeta,
@@ -40,6 +41,14 @@ const Template = (args: { value: boolean }) => ({
     props: args
 })
 
+export const Disabled = {
+    render: Template,
+    args: {
+        value: faker.phone.number("##########"),
+        disabled: true
+    }
+}
+
 export const Empty = {
     render: Template,
     args: {}
@@ -58,13 +67,5 @@ export const ReadOnlyCountry = {
         value: faker.phone.number("##########"),
         country: "US",
         readonlyCountry: true
-    }
-}
-
-export const Disabled = {
-    render: Template,
-    args: {
-        value: faker.phone.number("##########"),
-        disabled: true
     }
 }

@@ -5,8 +5,8 @@
     import "@vintagelabs/vintage/themes/theme-vintage.css"
     import "@vintagelabs/vintage/styles/all.css"
 
-    export let theme = ""
     export let dark = false
+    export let theme = ""
 </script>
 
 <div data-theme={theme} class:dark>

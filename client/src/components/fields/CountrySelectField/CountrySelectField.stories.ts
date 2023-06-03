@@ -1,7 +1,8 @@
-import type {Meta} from "@storybook/svelte"
-import type {ComponentType} from "svelte"
 import Component from "."
 import baseMeta from "@components/fields/BaseSearchSelectField/BaseSearchSelectField.stories"
+import type {Meta} from "@storybook/svelte"
+import type {ComponentType} from "svelte"
+
 
 const meta: Meta<typeof Component> = {
     component: Component as ComponentType,
@@ -19,6 +20,13 @@ const Template = (args: {value: boolean}) => ({
     props: args
 })
 
+export const Disabled = {
+    render: Template,
+    args: {
+        disabled: true
+    }
+}
+
 export const Example = {
     render: Template,
     args: {
@@ -30,12 +38,5 @@ export const WithValue = {
     render: Template,
     args: {
         value: "US"
-    }
-}
-
-export const Disabled = {
-    render: Template,
-    args: {
-        disabled: true
     }
 }

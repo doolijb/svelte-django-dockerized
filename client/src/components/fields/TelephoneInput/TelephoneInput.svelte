@@ -1,28 +1,27 @@
 <script lang="ts">
-    import {onMount} from "svelte"
     import {BaseTextInput} from "@components"
+    import {countries} from "@data"
     import {
-        maxLengthValidator,
         completeTelephoneValidator,
+        maxLengthValidator,
         possibleTelephoneValidator
     } from "@validators"
-    import type {IFieldValidator} from "@interfaces"
-    import {countries} from "@constants"
     import {AsYouType} from "libphonenumber-js"
+    import type {IFieldValidator} from "@interfaces"
 
-    export let label: string = "Telephone"
-    export let type: string = "tel"
-    export let value: string = ""
+    export let label = "Telephone"
+    export let type = "tel"
+    export let value = ""
     export let errors: IFieldValidator[] = []
-    export let disabled: boolean = false
-    export let onInput: (e: Event) => void = formatInput
-    export let onFocus: (e: Event) => void = () => {}
-    export let onBlur: (e: Event) => void = () => {}
+    export let disabled = false
+    export let onInput: (e: Event) => void | undefined
+    export let onFocus: (e: Event) => void | undefined
+    export let onBlur: (e: Event) => void | undefined
 
     // Component specific
     let ref: HTMLInputElement
-    export let readonlyCountry: boolean = false
-    export let country = countries['US'].code
+    export let readonlyCountry = false
+    export let country = countries["US"].code
 
     function formatInput(e?: InputEvent | FocusEvent) {
         // Return if no country is selected or if the input is empty, or if backspace is pressed

@@ -1,7 +1,8 @@
-import type {Meta} from "@storybook/svelte"
-import type {ComponentType} from "svelte"
 import Component from "."
 import {minLengthValidator, requiredValidator} from "@validators"
+import type {Meta} from "@storybook/svelte"
+import type {ComponentType} from "svelte"
+
 
 const meta: Meta<typeof Component> = {
     component: Component as ComponentType,
@@ -30,7 +31,16 @@ const Template = (args: {value: boolean}) => ({
     props: args
 })
 
+const minLength = minLengthValidator({minLen: 5})
 const required = requiredValidator()
+
+export const Multiple = {
+    render: Template,
+    args: {
+        validators: [required, minLength],
+        errors: [minLength]
+    }
+}
 
 export const Sticky = {
     render: Template,
@@ -44,15 +54,5 @@ export const StickyError = {
     args: {
         validators: [required],
         errors: [required]
-    }
-}
-
-const minLength = minLengthValidator({minLen: 5})
-
-export const Multiple = {
-    render: Template,
-    args: {
-        validators: [required, minLength],
-        errors: [minLength]
     }
 }

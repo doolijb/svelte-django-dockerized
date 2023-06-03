@@ -6,36 +6,57 @@
         "isolatedModules": true,
         "module": "ESNext",
         "paths": {
+            "@app/*": [
+                "./src/*"
+            ],
             "@components": [
-                "./src/components/index"
+                "./src/components"
             ],
             "@components/*": [
                 "./src/components/*"
             ],
             "@constants": [
-                "src/constants/index"
+                "src/constants"
+            ],
+            "@constants/*": [
+                "src/constants/*"
+            ],
+            "@data": [
+                "src/data"
+            ],
+            "@data/*": [
+                "src/data/*"
             ],
             "@decorators": [
-                "src/components/.decorators/index"
+                "src/components/.decorators"
+            ],
+            "@decorators/*": [
+                "src/components/.decorators/*"
             ],
             "@interfaces": [
-                "./src/interfaces/index"
+                "./src/interfaces"
             ],
             "@interfaces/*": [
                 "./src/interfaces/*"
             ],
             "@stores": [
-                "./src/stores/index"
+                "./src/stores"
             ],
             "@stores/*": [
                 "./src/stores/*"
+            ],
+            "@themes": [
+                "src/themes"
             ],
             "@themes/*": [
                 "src/themes/*"
             ],
             "@validators": [
-                "./src/validators/index"
-            ]
+                "./src/validators"
+            ],
+            "@validators/*": [
+                "./src/validators/*"
+            ],
         },
         "resolveJsonModule": true,
         "target": "ESNext",

@@ -1,14 +1,14 @@
 <script lang="ts">
-    import type {IFieldValidator} from "@interfaces"
     import {popup} from "@skeletonlabs/skeleton"
+    import type {IFieldValidator} from "@interfaces"
 
-    export let validators: IFieldValidator[] = []
     export let errors: IFieldValidator[] = []
+    export let validators: IFieldValidator[] = []
 </script>
 
 {#each validators as validator}
     {#if validator.sticky || errors.includes(validator)}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-click-events-have-key-events Required to make cursor behavior work as intended-->
         <span
             class="badge ms-1 select-none"
             class:variant-soft-primary={!errors.includes(validator)}

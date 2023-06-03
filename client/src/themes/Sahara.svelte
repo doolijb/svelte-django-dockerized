@@ -5,8 +5,8 @@
     import "@skeletonlabs/skeleton/themes/theme-sahara.css"
     import "@skeletonlabs/skeleton/styles/all.css"
 
-    export let theme = ""
     export let dark = false
+    export let theme = ""
 </script>
 
 <div data-theme={theme} class:dark>

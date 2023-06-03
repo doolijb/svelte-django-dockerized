@@ -14,7 +14,6 @@
     }
 
     onMount(() => {
-        console.log(registry)
         showModal()
     })
 </script>

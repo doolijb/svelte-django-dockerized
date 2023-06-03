@@ -1,11 +1,7 @@
 <script lang="ts">
-    import type {IUser} from "@interfaces"
     import {ReviewModes} from "@constants"
     import {onMount} from "svelte"
-
-    export let mode: string = ReviewModes.CREATE
-    console.log("mode", mode)
-    export let user: IUser | undefined | null = null
+    import type {IUser} from "@interfaces"
 
     export let formData = {
         user: {
@@ -17,6 +13,9 @@
             passwordConfirm: ""
         }
     }
+    export let mode: string = ReviewModes.CREATE
+
+    export let user: IUser | undefined | null = null
 
     const invalidFields: string[] = ["username"]
 

@@ -5,8 +5,8 @@
     import "@skeletonlabs/skeleton/themes/theme-skeleton.css"
     import "@skeletonlabs/skeleton/styles/all.css"
 
-    export let theme = ""
     export let dark = false
+    export let theme = ""
 </script>
 
 <div class="dark:text-gray-100" data-theme={theme} class:dark>

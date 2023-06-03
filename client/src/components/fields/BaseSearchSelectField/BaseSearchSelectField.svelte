@@ -5,38 +5,49 @@
     /**
      * Some documentation on how to use this component
      */
-    import {onMount} from "svelte"
-    import {popup, type PopupSettings} from "@skeletonlabs/skeleton"
-    import {ValidStates} from "@constants"
-    import type {IFieldValidator} from "@interfaces"
-    import {ValidationBadges, ValidationLegend} from "@components"
-    import {Autocomplete} from "@skeletonlabs/skeleton"
-    import type {AutocompleteOption} from "@skeletonlabs/skeleton"
-    import {v4 as uuidv4} from "uuid"
+    import { ValidationBadges, ValidationLegend } from "@components"
+    import { ValidStates } from "@constants"
+    import { Autocomplete, popup, type PopupSettings } from "@skeletonlabs/skeleton"
+    import { v4 as uuidv4 } from "uuid"
+    import { onMount } from "svelte"
+    import type { AutocompleteOption } from "@skeletonlabs/skeleton"
+    import type { IFieldValidator } from "@interfaces"
 
+
+    export let disabled = false
+
+    export let errors: IFieldValidator[] = []
     /**
      * Exported Props
      */
-    export let label: string = "Field Label"
-    export let placeholder: string = "Search options"
-    export let options: AutocompleteOption[] = []
-    export let value: any = null
-    export let validators: IFieldValidator[] = []
-    export let errors: IFieldValidator[] = []
-    export let disabled: boolean = false
+    export let label = "Field Label"
+    export let onBlur: (e: Event) => void | undefined
+    export let onFocus: (e: Event) => void | undefined
     // Events
-    export let onInput: (e: Event) => void = () => {}
-    export let onFocus: (e: Event) => void = () => {}
-    export let onBlur: (e: Event) => void = () => {}
+    export let onInput: (e: Event) => void | undefined
+
+    export let options: AutocompleteOption[] = []
+
+    export let placeholder = "Search options"
+
+
     // Refs
     export let ref: HTMLInputElement
+
+
+
+    export let searchInput = ""
+
+
+    export let validators: IFieldValidator[] = []
+
+    export let value: any = null
 
     /**
      * Variables
      */
     // On search input, we need to update the selected option
-    $: searchInput = ""
-    $: selectedOption = getOptionByLabel(searchInput) || null
+    $: selectedOption = null
     $: required = false
     $: isTouched = false
     $: validState = isTouched
@@ -44,6 +55,11 @@
             ? ValidStates.VALID
             : ValidStates.INVALID
         : ValidStates.NONE
+
+    /**
+     * Constants
+     */
+    const legendPopup: PopupSettings = ValidationLegend.makePopupSettings()
 
     /**
      * Functions
@@ -56,17 +72,20 @@
     }
 
     function updateField() {
+        selectedOption = getOptionByLabel(searchInput) || null
         // Update the value
-        isTouched = true
         if (selectedOption) {
             value = selectedOption.value
             searchInput = selectedOption.label
         } else {
             value = null
+            searchInput = ""
         }
         isTouched = true
         validate()
     }
+
+    // Helpers
 
     function getOptionByLabel(label: string): AutocompleteOption {
         // Find the option by label so we can track state during input or selection
@@ -82,6 +101,8 @@
         const option = options.find(option => option.value === value)
         return option
     }
+
+    // Event handlers
 
     function handleBlur(e: Event) {
         // If the user has not selected a valid option, clear the input
@@ -100,11 +121,6 @@
     }
 
     /**
-     * Constants
-     */
-    const legendPopup: PopupSettings = ValidationLegend.makePopupSettings()
-
-    /**
      * Lifecycle
      */
     onMount(() => {
@@ -115,9 +131,9 @@
         }
         validators.forEach(validator => {
             switch (validator.key) {
-                case "required":
-                    required = true
-                    break
+            case "required":
+                required = true
+                break
             }
         })
     })
@@ -152,7 +168,7 @@
             type="search"
             name="autocomplete-search"
             bind:value={searchInput}
-            {placeholder}
+            placeholder={!disabled ? placeholder : ""}
             use:popup={popupSettings}
             on:input={onInput}
             on:blur={e => {

@@ -1,9 +1,8 @@
 <script lang="ts">
-    import type {IEmailAddress} from "src/interfaces/index"
     import {
         BoolCell,
-        TextCell,
         DeleteControlCell,
+        TextCell,
         ViewControlCell
     } from "@components"
     import Icon from "@iconify/svelte"
@@ -13,6 +12,7 @@
         Table,
         tableMapperValues
     } from "@skeletonlabs/skeleton"
+    import type {IEmailAddress} from "src/interfaces/index"
 
     export let emailAddresses = new Map<string, IEmailAddress>()
 

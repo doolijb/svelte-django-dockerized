@@ -1,26 +1,30 @@
-import type {Meta} from "@storybook/svelte"
-import type {ComponentType} from "svelte"
 import Component from "."
 import {requiredValidator} from "@validators"
 import type {AutocompleteOption} from "@skeletonlabs/skeleton"
+import type {Meta} from "@storybook/svelte"
+import type {ComponentType} from "svelte"
+
 
 const meta: Meta<typeof Component> = {
-    component: Component as ComponentType,
-    tags: ["autodocs"],
-    decorators: [],
     argTypes: {
+
+        disabled: {
+            control: {
+                type: "boolean"
+            }
+        },
         // @ts-ignore-next-line
         label: {
             control: {
                 type: "text"
             }
         },
-        placeholder: {
+        options: {
             control: {
-                type: "text"
+                type: "object"
             }
         },
-        value: {
+        placeholder: {
             control: {
                 type: "text"
             }
@@ -30,17 +34,15 @@ const meta: Meta<typeof Component> = {
                 type: "object"
             }
         },
-        options: {
+        value: {
             control: {
-                type: "object"
-            }
-        },
-        disabled: {
-            control: {
-                type: "boolean"
+                type: "text"
             }
         }
-    }
+    },
+    component: Component as ComponentType,
+    decorators: [],
+    tags: ["autodocs"]
 }
 
 export default meta
@@ -50,37 +52,40 @@ const Template = (args: {value: boolean}) => ({
     props: args
 })
 
-export const Example = {
-    render: Template,
+const validators = [requiredValidator()]
+const options: AutocompleteOption[] = [
+    {label: "Option 1", value: "Value 1"},
+    {label: "Option 2", value: "Value 2"},
+    {label: "Option 3", value: "Value 3"}
+]
+
+export const Disabled = {
     args: {
-        options: [
-            {label: "Option 1", value: "Value 1"},
-            {label: "Option 2", value: "Value 2"},
-            {label: "Option 3", value: "Value 3"}
-        ] as AutocompleteOption[]
-    }
+        disabled: true,
+        options
+    },
+    render: Template
+}
+
+export const Example = {
+    args: {
+        options
+    },
+    render: Template
 }
 
 export const WithValidators = {
-    render: Template,
     args: {
-        options: Example.args.options,
-        validators: [requiredValidator()]
-    }
+        options,
+        validators,
+    },
+    render: Template
 }
 
 export const WithValue = {
-    render: Template,
     args: {
-        ...WithValidators.args,
+        options,
         value: "Value 2"
-    }
-}
-
-export const Disabled = {
-    render: Template,
-    args: {
-        ...WithValidators.args,
-        disabled: true
-    }
+    },
+    render: Template
 }

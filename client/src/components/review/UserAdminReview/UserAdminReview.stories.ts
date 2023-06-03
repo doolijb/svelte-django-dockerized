@@ -1,7 +1,8 @@
 import Component from "."
-import type {Meta} from "@storybook/svelte"
 import {ReviewModes} from "@constants"
 import {examples} from "@interfaces"
+import type {Meta} from "@storybook/svelte"
+
 
 const meta: Meta<typeof Component> = {
     // Automatically generate the component name as "Table cells/BoolCell"

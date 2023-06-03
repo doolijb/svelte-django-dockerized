@@ -1,8 +1,9 @@
-import {examples} from "@interfaces"
-import {ModalDecorator} from "@decorators"
-import type {ModalSettings} from "@skeletonlabs/skeleton"
-import {ReviewModes} from "@constants"
 import Component from "./UserAdminModal.svelte"
+import {ReviewModes} from "@constants"
+import {ModalDecorator} from "@decorators"
+import {examples} from "@interfaces"
+import type {ModalSettings} from "@skeletonlabs/skeleton"
+
 
 const meta = {
     component: ModalDecorator,

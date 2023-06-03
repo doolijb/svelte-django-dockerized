@@ -1,21 +1,21 @@
 <script lang="ts">
     import {BaseSearchSelectField} from "@components"
-    import type {AutocompleteOption} from "@skeletonlabs/skeleton"
-    import type {IFieldValidator, ICountry, IRegion} from "@interfaces"
-    import {countries} from "@constants"
+    import {countries} from "@data"
     import {requiredValidator} from "@validators"
+    import type {ICountry, IFieldValidator, IRegion} from "@interfaces"
+    import type {AutocompleteOption} from "@skeletonlabs/skeleton"
     import type { CountryCode } from "libphonenumber-js"
 
-    export let label: string = "Region"
-    export let placeholder: string = "Search regions"
+    export let label = "Region"
+    export let placeholder = "Search regions"
     export let value: any = null
     export let validators: IFieldValidator[] = [requiredValidator()]
     export let errors: IFieldValidator[] = []
-    export let disabled: boolean = false
+    export let disabled = false
     // Events
-    export let onInput: (e: Event) => void = () => {}
-    export let onFocus: (e: Event) => void = () => {}
-    export let onBlur: (e: Event) => void = () => {}
+    export let onInput: (e: Event) => void | undefined
+    export let onFocus: (e: Event) => void | undefined
+    export let onBlur: (e: Event) => void | undefined
     // Refs
     export let ref: HTMLInputElement
     // Component specific

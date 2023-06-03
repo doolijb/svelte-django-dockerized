@@ -2,8 +2,8 @@
     import Icon from "@iconify/svelte"
     import {clipboard} from "@skeletonlabs/skeleton"
 
-    export let text = ""
     export let copy: string = null
+    export let text = ""
 
     $: copyText = copy ? copy : text
     $: title = copyText ? "Click to copy" : ""
@@ -27,7 +27,7 @@
             {#if copyText}
                 <Icon
                     icon="mdi:content-copy"
-                    class="ms-2 mt-1 {!focused ? 'invisible' : ''}"
+                    class="ms-2 mt-1 {!focused ? "invisible" : ""}"
                 />
             {/if}
         </span>

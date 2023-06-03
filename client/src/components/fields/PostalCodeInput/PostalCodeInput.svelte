@@ -1,20 +1,51 @@
 <script lang="ts">
     import {BaseTextInput} from "@components"
-    import { countries } from "@constants"
-    import type {ICountry, IFieldValidator} from "@interfaces"
+    import { countries } from "@data"
     import {
-        requiredValidator,
-        minLengthValidator,
         maxLengthValidator,
+        minLengthValidator,
         postalCodeValidator,
+        requiredValidator,
     } from "@validators"
+    import type {ICountry, IFieldValidator} from "@interfaces"
     import type { CountryCode } from "libphonenumber-js"
+
+
+    // Component specific
+    export let countryCode: CountryCode
+
+
+    export let disabled = false
+
+
+    export let errors: IFieldValidator[] = []
 
     /**
      * Variables
      */
-    export let label: string = "Postal Code"
-    export let type: string = "text"
+    export let label = "Postal Code"
+
+    export let onBlur: (e: Event) => void | undefined
+
+    export let onFocus: (e: Event) => void | undefined
+
+
+    // Events
+    export let onInput: (e: Event) => void | undefined
+
+
+
+    // Refs
+    export let ref: HTMLInputElement
+
+
+
+
+    export let type = "text"
+
+
+
+
     export let validators: IFieldValidator[] = [
         requiredValidator({}),
         minLengthValidator({minLen: 3}),
@@ -23,17 +54,9 @@
             getCountryCode: () => countryCode || null
         })
     ]
-    export let value: string = ""
-    export let errors: IFieldValidator[] = []
-    export let disabled: boolean = false
-    // Events
-    export let onInput: (e: Event) => void = () => {}
-    export let onFocus: (e: Event) => void = () => {}
-    export let onBlur: (e: Event) => void = () => {}
-    // Refs
-    export let ref: HTMLInputElement
-    // Component specific
-    export let countryCode: CountryCode
+
+
+    export let value = ""
 
     /**
      * Component specific

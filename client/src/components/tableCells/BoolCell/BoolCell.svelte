@@ -1,8 +1,8 @@
 <script lang="ts">
     import Icon from "@iconify/svelte"
 
-    export let value: boolean | null = null
     export let title: string | null = null
+    export let value: boolean | null = null
 
     function getBoolDisplay(value: boolean): string {
         if (typeof value === "undefined" || value === null) {

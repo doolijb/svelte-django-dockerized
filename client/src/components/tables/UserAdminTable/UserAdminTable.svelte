@@ -1,9 +1,8 @@
 <script lang="ts">
-    import type {IUser} from "src/interfaces/index"
     import {
         BoolCell,
-        TextCell,
         DeleteControlCell,
+        TextCell,
         ViewControlCell as ViewControlCell
     } from "@components"
     import Icon from "@iconify/svelte"
@@ -13,10 +12,11 @@
         Table,
         tableMapperValues
     } from "@skeletonlabs/skeleton"
-
-    export let users = new Map<string, IUser>()
+    import type {IUser} from "src/interfaces/index"
 
     export let pageCount = 0
+
+    export let users = new Map<string, IUser>()
 
     const iconWidth = "1.5em"
 

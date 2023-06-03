@@ -1,8 +1,9 @@
-import type { Meta } from "@storybook/svelte"
 import Component from "."
-import type { ComponentType } from "svelte"
 import baseTextInputMeta from "@components/fields/BaseTextInput/BaseTextInput.stories"
 import { faker } from "@faker-js/faker"
+import type { Meta } from "@storybook/svelte"
+import type { ComponentType } from "svelte"
+
 
 const meta: Meta<typeof Component> = {
     component: Component as ComponentType,
@@ -25,28 +26,6 @@ const Template = (args: { value: boolean }) => ({
 })
 
 
-export const Example = {
-    render: Template,
-}
-
-export const USFilled = {
-    render: Template,
-    args: {
-        // fake postal code
-        value: faker.address.zipCode("#####"),
-        countryCode: "US"
-    }
-}
-
-export const USFilledLong = {
-    render: Template,
-    args: {
-        value: faker.address.zipCode("#########"),
-        countryCode: "US"
-    }
-}
-
-
 export const CAFilled = {
     render: Template,
     args: {
@@ -63,11 +42,33 @@ export const CAFilledLong = {
     }
 }
 
+export const Example = {
+    render: Template,
+}
+
+
 export const Invalid = {
     render: Template,
     args: {
         value: "12345",
         countryCode: "CA"
+    }
+}
+
+export const USFilled = {
+    render: Template,
+    args: {
+        // fake postal code
+        value: faker.address.zipCode("#####"),
+        countryCode: "US"
+    }
+}
+
+export const USFilledLong = {
+    render: Template,
+    args: {
+        value: faker.address.zipCode("#########"),
+        countryCode: "US"
     }
 }
 

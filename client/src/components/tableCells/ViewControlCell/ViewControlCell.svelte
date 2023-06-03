@@ -1,9 +1,9 @@
 <script lang="ts">
     import Icon from "@iconify/svelte"
 
-    export let title = "View"
-    export let onClick = (args: any) => console.log("onClick")
     export let disabled = false
+    export let onClick = (args: any) => console.log("onClick")
+    export let title = "View"
 
     let focused = false
 </script>

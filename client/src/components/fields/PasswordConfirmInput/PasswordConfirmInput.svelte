@@ -1,32 +1,34 @@
 <script lang="ts">
     import {BaseTextInput} from "@components"
     import {
+        confirmMatchValidator,
         requiredValidator,
-        minLengthValidator,
-        maxLengthValidator,
-        lowercaseRequiredValidator,
-        uppercaseRequiredValidator,
-        numberRequiredValidator,
-        specialCharRequiredValidator,
-        confirmMatchValidator
     } from "@validators"
     import type {IFieldValidator} from "@interfaces"
 
-    export let label: string = "Password"
-    export let type: string = "password"
+    export let disabled = false
+    export let errors: IFieldValidator[] = []
+    export let label = "Password"
+    // Component specific
+    export let matchValue = ""
+
+    export let onBlur: (e: Event) => void | undefined
+
+    export let onFocus: (e: Event) => void | undefined
+
+    export let onInput: (e: Event) => void | undefined
+
+    export let ref: HTMLInputElement
+
+    export let type = "password"
+
     export let validators: IFieldValidator[] = [
         requiredValidator({}),
-        confirmMatchValidator({fieldName: "Password", getMatchValue})
+        confirmMatchValidator({label: "Password", getMatchValue})
     ]
-    export let value: string = ""
-    export let errors: IFieldValidator[] = []
-    export let disabled: boolean = false
-    export let onInput: (e: Event) => void = () => {}
-    export let onFocus: (e: Event) => void = () => {}
-    export let onBlur: (e: Event) => void = () => {}
 
-    // Component specific
-    export let matchValue: string = ""
+
+    export let value = ""
     function getMatchValue(): string {
         return matchValue
     } // TODO
@@ -42,6 +44,7 @@
     bind:onFocus
     bind:onBlur
     bind:onInput
+    bind:ref
 />
 
 <style lang="postcss">

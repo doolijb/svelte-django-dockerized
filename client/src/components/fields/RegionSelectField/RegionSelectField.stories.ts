@@ -1,7 +1,8 @@
-import type { Meta } from "@storybook/svelte"
-import type { ComponentType } from "svelte"
 import Component from "."
 import baseMeta from "@components/fields/BaseSearchSelectField/BaseSearchSelectField.stories"
+import type { Meta } from "@storybook/svelte"
+import type { ComponentType } from "svelte"
+
 
 const meta: Meta<typeof Component> = {
     component: Component as ComponentType,
@@ -19,17 +20,25 @@ const Template = (args: { value: boolean }) => ({
     props: args
 })
 
-export const USStates = {
-    render: Template,
-    args: {
-        countryCode: "US"
-    }
-}
-
 export const CAProvinces = {
     render: Template,
     args: {
         countryCode: "CA"
+    }
+}
+
+export const CNProvinces = {
+    render: Template,
+    args: {
+        countryCode: "CN"
+    }
+}
+
+export const Disabled = {
+    render: Template,
+    args: {
+        countryCode: "US",
+        disabled: true
     }
 }
 
@@ -47,10 +56,10 @@ export const UMIslands = {
     }
 }
 
-export const CNProvinces = {
+export const USStates = {
     render: Template,
     args: {
-        countryCode: "CN"
+        countryCode: "US"
     }
 }
 
@@ -59,13 +68,5 @@ export const WithValue = {
     args: {
         countryCode: "US",
         value: "US-CA"
-    }
-}
-
-export const Disabled = {
-    render: Template,
-    args: {
-        countryCode: "US",
-        disabled: true
     }
 }

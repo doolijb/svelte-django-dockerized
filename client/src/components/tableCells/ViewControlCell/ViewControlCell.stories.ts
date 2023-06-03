@@ -3,6 +3,7 @@ import {TableDataDecorator} from "@decorators"
 import {faker} from "@faker-js/faker"
 import type {Meta} from "@storybook/svelte"
 
+
 const meta: Meta<typeof Component> = {
     // Automatically generate the component name as "Table cells/BoolCell"
 
@@ -10,7 +11,7 @@ const meta: Meta<typeof Component> = {
     tags: ["autodocs"],
     decorators: [() => TableDataDecorator as any],
     argTypes: {
-        // @ts-ignore - Works as is
+        // @ts-ignore
         title: {
             description: "The text to display on hover",
             controls: {

@@ -3,6 +3,7 @@ import {TableDataDecorator} from "@decorators"
 import {faker} from "@faker-js/faker"
 import type {Meta} from "@storybook/svelte"
 
+
 const meta: Meta<typeof Component> = {
     // Automatically generate the component name as "Table cells/BoolCell"
 
@@ -35,6 +36,13 @@ const Template = (args: {value: boolean}) => ({
     props: args
 })
 
+export const Empty = {
+    render: Template,
+    args: {
+        text: ""
+    }
+}
+
 export const NormalText = {
     render: Template,
     args: {
@@ -47,12 +55,5 @@ export const TruncatedCopy = {
     args: {
         text: 12345,
         copy: 1234567890
-    }
-}
-
-export const Empty = {
-    render: Template,
-    args: {
-        text: ""
     }
 }

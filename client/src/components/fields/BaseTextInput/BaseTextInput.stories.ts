@@ -1,12 +1,13 @@
-import type {Meta} from "@storybook/svelte"
 import Component from "."
-import type {ComponentType} from "svelte"
 import {
-    requiredValidator,
-    minLengthValidator,
     maxLengthValidator,
+    minLengthValidator,
+    requiredValidator,
     specialCharValidator
 } from "@validators"
+import type {Meta} from "@storybook/svelte"
+import type {ComponentType} from "svelte"
+
 
 const meta: Meta<typeof Component> = {
     component: Component as ComponentType,
@@ -87,6 +88,14 @@ const Template = (args: {value: boolean}) => ({
     props: args
 })
 
+export const Disabled = {
+    render: Template,
+    args: {
+        value: "Hello World",
+        disabled: true
+    }
+}
+
 export const Empty = {
     render: Template,
     args: {
@@ -101,11 +110,16 @@ export const Filled = {
     }
 }
 
-export const Disabled = {
+export const FilledWithValidators = {
     render: Template,
     args: {
         value: "Hello World",
-        disabled: true
+        validators: [
+            requiredValidator(),
+            minLengthValidator(),
+            maxLengthValidator(),
+            specialCharValidator()
+        ]
     }
 }
 
@@ -119,19 +133,6 @@ export const WithPlaceholder = {
 export const WithValidators = {
     render: Template,
     args: {
-        validators: [
-            requiredValidator(),
-            minLengthValidator(),
-            maxLengthValidator(),
-            specialCharValidator()
-        ]
-    }
-}
-
-export const FilledWithValidators = {
-    render: Template,
-    args: {
-        value: "Hello World",
         validators: [
             requiredValidator(),
             minLengthValidator(),
